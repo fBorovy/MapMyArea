@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_with_google">Zaloguj kontem Google</string>
+    <string name="login_with_email">Zaloguj używając adresu email</string>
+    <string name="register">Zarejestruj</string>
+    <string name="profile_menu">Menu użytkownika</string>
+    <string name="user_maps">Zapisane mapy</string>
+    <string name="user">Użytkownik</string>
+    <string name="signOut">Wyloguj</string>
+</resources>

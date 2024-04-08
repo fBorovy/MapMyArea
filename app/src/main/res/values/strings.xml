@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">MapMyArea</string>
+    <string name="app_name" translatable="false">MapMyArea</string>
+    <string name="web_client_id" translatable="false">1071787505856-lftooc61sfqn2jmgnj8c0jabhoguv3jr.apps.googleusercontent.com</string>
+    <string name="login_with_google">Log in with Google</string>
+    <string name="login_with_email">Log in with email</string>
+    <string name="register">Sign in</string>
+    <string name="profile_menu">User\'s menu</string>
+    <string name="user_maps">Saved maps</string>
+    <string name="user">User</string>
+    <string name="signOut">Log out</string>
 </resources>
