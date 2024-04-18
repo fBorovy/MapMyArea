@@ -1,11 +1,19 @@
 <resources>
     <string name="app_name" translatable="false">MapMyArea</string>
     <string name="web_client_id" translatable="false">1071787505856-lftooc61sfqn2jmgnj8c0jabhoguv3jr.apps.googleusercontent.com</string>
-    <string name="login_with_google">Log in with Google</string>
-    <string name="login_with_email">Log in with email</string>
-    <string name="register">Sign in</string>
+    <string name="login_with_google">Sign in with Google</string>
+    <string name="login_with_email">Sign in with email</string>
+    <string name="register">Sign up</string>
     <string name="profile_menu">User\'s menu</string>
     <string name="user_maps">Saved maps</string>
     <string name="user">User</string>
-    <string name="signOut">Log out</string>
+    <string name="signOut">Sign out</string>
+    <string name="enter_email">E-mail addres</string>
+    <string name="go_back">Go back</string>
+    <string name="enter_password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="enter_email_or_username">Enter username or email address</string>
+    <string name="sign_in">Sign in</string>
+    <string name="toast_sign_in">Signed in successfully</string>
+    <string name="toast_sign_out">Signed out successfully</string>
 </resources>

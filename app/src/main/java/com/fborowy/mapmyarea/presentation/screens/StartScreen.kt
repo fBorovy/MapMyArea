@@ -1,4 +1,4 @@
-package com.fborowy.mapmyarea.presentation
+package com.fborowy.mapmyarea.presentation.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -20,16 +20,19 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.presentation.google_sign_in.SignInState
+import com.fborowy.mapmyarea.domain.Screen
+import com.fborowy.mapmyarea.domain.SignInState
 import com.fborowy.mapmyarea.ui.theme.ButtonBlack
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
 
 @Composable
-fun LoginScreen(
+fun StartScreen(
     signInState: SignInState,
-    onSignInClick: () -> Unit
+    onSignInClick: () -> Unit,
+    navController: NavController,
 ) {
     val context = LocalContext.current
 
@@ -83,7 +86,7 @@ fun LoginScreen(
                 .clip(RoundedCornerShape(15.dp))
                 .background(ButtonBlack)
                 .padding(13.dp)
-                .clickable { },
+                .clickable { navController.navigate(Screen.EmailSignInScreen.route) },
             contentAlignment = Alignment.Center
         ) {
             Text(text = context.resources.getString(R.string.login_with_email), style = Typography.titleMedium)
@@ -96,7 +99,7 @@ fun LoginScreen(
                 .clip(RoundedCornerShape(15.dp))
                 .background(ButtonBlack)
                 .padding(13.dp)
-                .clickable { },
+                .clickable { navController.navigate(Screen.EmailSignUpScreen.route) },
             contentAlignment = Alignment.Center
         ) {
             Text(text = context.resources.getString(R.string.register), style = Typography.titleMedium)

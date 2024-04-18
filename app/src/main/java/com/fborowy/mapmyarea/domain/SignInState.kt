@@ -1,4 +1,4 @@
-package com.fborowy.mapmyarea.presentation.google_sign_in
+package com.fborowy.mapmyarea.domain
 
 data class SignInState(
     val signInSuccessful: Boolean = false,

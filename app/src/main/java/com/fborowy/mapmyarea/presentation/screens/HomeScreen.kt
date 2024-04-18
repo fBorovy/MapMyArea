@@ -1,7 +1,8 @@
-package com.fborowy.mapmyarea.presentation
+package com.fborowy.mapmyarea.presentation.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,17 +21,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.presentation.google_sign_in.GoogleUserData
+import com.fborowy.mapmyarea.data.UserData
+import com.fborowy.mapmyarea.ui.theme.ButtonBlack
+import com.fborowy.mapmyarea.ui.theme.DropDownMenuGray
+import com.fborowy.mapmyarea.ui.theme.TextFieldGray
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
 
 @Composable
 fun HomeScreen(
-    userData: GoogleUserData?,
+    userData: UserData?,
     onSignOut: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -79,10 +84,20 @@ fun HomeScreen(
                         DropdownMenu(
                             expanded = isMenuVisible,
                             onDismissRequest = { isMenuVisible = false },
+                            modifier = Modifier
+                                .background(DropDownMenuGray)
                         ) {
                             DropdownMenuItem(
-                                text = {context.getString(R.string.signOut)},
-                                onClick = { onSignOut() })
+                                text = {
+                                    Text(
+                                        context.getString(R.string.signOut),
+                                        style = Typography.bodySmall
+                                    )
+                                       },
+                                onClick = { onSignOut() },
+                                modifier = Modifier
+                                    .background(DropDownMenuGray)
+                            )
                         }
                     }
                 }

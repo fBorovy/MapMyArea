@@ -37,6 +37,7 @@ play-services = { group = "com.google.android.gms", name = "play-services-auth",
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 androidx-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navVersion" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

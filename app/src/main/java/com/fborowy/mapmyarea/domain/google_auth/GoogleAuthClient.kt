@@ -1,23 +1,24 @@
-package com.fborowy.mapmyarea.presentation.google_sign_in
+package com.fborowy.mapmyarea.domain.google_auth
 
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import com.fborowy.mapmyarea.R
+import com.fborowy.mapmyarea.data.UserData
+import com.fborowy.mapmyarea.domain.SignInResult
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
 
-class GoogleAuthUiClient(
+class GoogleAuthClient(
     private val context: Context,
-    private val oneTapClient: SignInClient
-) { //class responsible for logging, logout and getting data about logged user
-    private val auth = Firebase.auth
+    private val oneTapClient: SignInClient,
+    private val auth: FirebaseAuth,
+) { //class responsible for logging, logout and getting data about logged with Google user
     suspend fun signIn(): IntentSender? {
         val result = try {
             oneTapClient.beginSignIn(
@@ -31,15 +32,15 @@ class GoogleAuthUiClient(
         return result?.pendingIntent?.intentSender
     }
 
-    suspend fun signInWithIntent(intent: Intent): GoogleSignInResult {
+    suspend fun signInWithIntent(intent: Intent): SignInResult {
         val credential = oneTapClient.getSignInCredentialFromIntent(intent)
         val googleIdToken = credential.googleIdToken
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
         return try {
             val user = auth.signInWithCredential(googleCredentials).await().user
-            GoogleSignInResult(
+            SignInResult(
                 data = user?.run {
-                    GoogleUserData(
+                    UserData(
                         userId = uid,
                         username = displayName,
                     )
@@ -49,7 +50,7 @@ class GoogleAuthUiClient(
         } catch (e: Exception) {
             e.printStackTrace()
             if(e is CancellationException) throw e
-            GoogleSignInResult(
+            SignInResult(
                 data = null,
                 errorMessage = e.message
             )
@@ -67,13 +68,6 @@ class GoogleAuthUiClient(
             )
             .setAutoSelectEnabled(true)
             .build()
-    }
-
-    fun getSignedGoogleUserInfo(): GoogleUserData? = auth.currentUser?.run {
-        GoogleUserData(
-            userId = uid,
-            username = displayName,
-        )
     }
 
     suspend fun signOut() {

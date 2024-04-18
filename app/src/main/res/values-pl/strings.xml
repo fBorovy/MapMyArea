@@ -7,4 +7,12 @@
     <string name="user_maps">Zapisane mapy</string>
     <string name="user">Użytkownik</string>
     <string name="signOut">Wyloguj</string>
+    <string name="enter_email">Adres e-mail</string>
+    <string name="go_back">Wróć</string>
+    <string name="enter_password">Hasło</string>
+    <string name="confirm_password">Powtórz hasło</string>
+    <string name="enter_email_or_username">Nazwa użytkownika lub adres email</string>
+    <string name="sign_in">Zaloguj</string>
+    <string name="toast_sign_in">Zalogowano pomyśłnie</string>
+    <string name="toast_sign_out">Wylogowano pomyślnie</string>
 </resources>

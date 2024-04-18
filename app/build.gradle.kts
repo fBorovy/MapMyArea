@@ -73,8 +73,11 @@ dependencies {
     implementation(platform(libs.firebase))
     implementation(libs.firebase.analytics)
     implementation(libs.play.services) //google play auth services are used for authentication with google account using firebase
-
+    implementation(libs.firebase.firestore)
+    
     //Navigation
     implementation(libs.androidx.navigation)
     implementation(libs.androidx.lifecycle)
+
+
 }

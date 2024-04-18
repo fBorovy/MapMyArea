@@ -8,19 +8,21 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.fborowy.mapmyarea.presentation.HomeScreen
-import com.fborowy.mapmyarea.presentation.LoginScreen
-import com.fborowy.mapmyarea.presentation.google_sign_in.GoogleAuthUiClient
-import com.fborowy.mapmyarea.presentation.google_sign_in.SignInViewModel
+import com.fborowy.mapmyarea.domain.Screen
+import com.fborowy.mapmyarea.presentation.screens.EmailSignInScreen
+import com.fborowy.mapmyarea.presentation.screens.EmailSignUpScreen
+import com.fborowy.mapmyarea.presentation.screens.HomeScreen
+import com.fborowy.mapmyarea.presentation.screens.StartScreen
+import com.fborowy.mapmyarea.domain.google_auth.GoogleAuthClient
+import com.fborowy.mapmyarea.domain.AppViewModel
+import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
@@ -29,22 +31,24 @@ fun AppNavigation(
     applicationContext: Context,
     lifecycleScope: LifecycleCoroutineScope
 ) {
+    val viewModel = viewModel<AppViewModel>()
+    val signInState by viewModel.signInState.collectAsStateWithLifecycle()
     val googleAuthUiClient by lazy {
-        GoogleAuthUiClient(
+        GoogleAuthClient(
             context = applicationContext,
-            oneTapClient = Identity.getSignInClient(applicationContext)
+            oneTapClient = Identity.getSignInClient(applicationContext),
+            viewModel.auth
         )
     }
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "login_screen") {
-        composable("login_screen") {
-            val viewModel = viewModel<SignInViewModel>()
-            val state by viewModel.state.collectAsStateWithLifecycle()
 
+
+    NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
+        composable(Screen.StartScreen.route) {
             LaunchedEffect(key1 = Unit) {
-                if (googleAuthUiClient.getSignedGoogleUserInfo() != null)
-                    navController.navigate("home_screen")
+                if (viewModel.auth.currentUser != null)
+                    navController.navigate(Screen.HomeScreen.route)
             }
             val launcher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartIntentSenderForResult(),
@@ -60,20 +64,20 @@ fun AppNavigation(
                 }
             )
 
-            LaunchedEffect(key1 = state.signInSuccessful) {
-                if (state.signInSuccessful) {
+            LaunchedEffect(key1 = signInState.signInSuccessful){
+                if (signInState.signInSuccessful){
                     Toast.makeText(
                         applicationContext,
-                        "SignInSuccessful",
+                        applicationContext.resources.getString(R.string.toast_sign_in),
                         Toast.LENGTH_LONG
                     ).show()
-                    navController.navigate("home_screen")
-                    viewModel.resetState()
+                    navController.navigate(Screen.HomeScreen.route)
+                    viewModel.resetSignInState()
                 }
             }
 
-            LoginScreen(
-                signInState = state,
+            StartScreen(
+                signInState = signInState,
                 onSignInClick = {
                     lifecycleScope.launch {
                         val signInIntentSender = googleAuthUiClient.signIn()
@@ -82,27 +86,69 @@ fun AppNavigation(
                                 signInIntentSender ?: return@launch
                             ).build()
                         )
-
                     }
-                }
+                },
+                navController = navController,
             )
         }
 
-        composable( route = "home_screen" ) {
+        composable(route = Screen.HomeScreen.route){
             HomeScreen(
-                userData = googleAuthUiClient.getSignedGoogleUserInfo(),
+                userData = viewModel.getSignedUserInfo(),
                 onSignOut = {
                     lifecycleScope.launch {
                         googleAuthUiClient.signOut()
                         Toast.makeText(
                             applicationContext,
-                            "Signed out",
+                            applicationContext.resources.getString(R.string.toast_sign_out),
                             Toast.LENGTH_LONG
                         ).show()
                         navController.popBackStack()
                     }
                 }
             )
+        }
+
+        composable(route = Screen.EmailSignUpScreen.route){
+            val emailAuthClient = EmailAuthClient(viewModel.auth)
+            LaunchedEffect(key1 = signInState.signInSuccessful){
+                if (signInState.signInSuccessful) {
+                    Toast.makeText(
+                        applicationContext,
+                        applicationContext.resources.getString(R.string.toast_sign_in),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    navController.navigate(Screen.HomeScreen.route)
+                    viewModel.resetSignInState()
+                }
+            }
+
+            EmailSignUpScreen(
+                navController = navController,
+                emailAuthClient,
+                onSignUpClick = {
+                    viewModel.onSignIn(it)
+                }
+            )
+        }
+
+        composable(route = Screen.EmailSignInScreen.route){
+            val emailAuthClient = EmailAuthClient(viewModel.auth)
+            LaunchedEffect(key1 = signInState.signInSuccessful){
+                if (signInState.signInSuccessful) {
+                    Toast.makeText(
+                        applicationContext,
+                        applicationContext.resources.getString(R.string.toast_sign_in),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    navController.navigate(Screen.HomeScreen.route)
+                    viewModel.resetSignInState()
+                }
+            }
+
+            EmailSignInScreen(navController = navController, emailAuthClient, onSignInClick = {
+                viewModel.onSignIn(it)
+            })
         }
     }
 }

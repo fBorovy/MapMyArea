@@ -12,3 +12,6 @@ val Pink40 = Color(0xFF7D5260)
 
 val TextWhite = Color(0xFFEDEDED)
 val ButtonBlack = Color(0xFF282828)
+val DropDownMenuGray = Color(0xFF494949)
+
+val TextFieldGray = Color(0xFF898989)
