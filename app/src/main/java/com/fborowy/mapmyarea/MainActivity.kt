@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
                     color = Color.White
                 ) {
                     AppNavigation(applicationContext, lifecycleScope)
+
                 }
             }
         }

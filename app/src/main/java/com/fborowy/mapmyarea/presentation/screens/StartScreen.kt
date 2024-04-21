@@ -44,7 +44,6 @@ fun StartScreen(
                 Toast.LENGTH_LONG
             ).show()
         }
-
     }
 
     Column(

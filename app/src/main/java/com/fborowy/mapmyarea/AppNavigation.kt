@@ -15,14 +15,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.fborowy.mapmyarea.domain.AppViewModel
 import com.fborowy.mapmyarea.domain.Screen
+import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
+import com.fborowy.mapmyarea.domain.google_auth.GoogleAuthClient
 import com.fborowy.mapmyarea.presentation.screens.EmailSignInScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignUpScreen
 import com.fborowy.mapmyarea.presentation.screens.HomeScreen
 import com.fborowy.mapmyarea.presentation.screens.StartScreen
-import com.fborowy.mapmyarea.domain.google_auth.GoogleAuthClient
-import com.fborowy.mapmyarea.domain.AppViewModel
-import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 
@@ -33,6 +33,7 @@ fun AppNavigation(
 ) {
     val viewModel = viewModel<AppViewModel>()
     val signInState by viewModel.signInState.collectAsStateWithLifecycle()
+    val emailAuthClient = EmailAuthClient(viewModel.auth, viewModel.database)
     val googleAuthUiClient by lazy {
         GoogleAuthClient(
             context = applicationContext,
@@ -66,6 +67,24 @@ fun AppNavigation(
 
             LaunchedEffect(key1 = signInState.signInSuccessful){
                 if (signInState.signInSuccessful){
+                    val user = viewModel.auth.currentUser
+                    viewModel.database.collection("users")
+                        .document(user!!.uid)
+                        .get()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val document = task.result
+                                if (!(document.exists())) {
+                                    val newFirestoreUser = hashMapOf(
+                                        "username" to user.displayName,
+                                        "savedMaps" to null,
+                                    )
+                                    viewModel.database.collection("users")
+                                        .document(user.uid)
+                                        .set(newFirestoreUser)
+                                }
+                            }
+                        }
                     Toast.makeText(
                         applicationContext,
                         applicationContext.resources.getString(R.string.toast_sign_in),
@@ -94,23 +113,21 @@ fun AppNavigation(
 
         composable(route = Screen.HomeScreen.route){
             HomeScreen(
-                userData = viewModel.getSignedUserInfo(),
-                onSignOut = {
-                    lifecycleScope.launch {
-                        googleAuthUiClient.signOut()
-                        Toast.makeText(
-                            applicationContext,
-                            applicationContext.resources.getString(R.string.toast_sign_out),
-                            Toast.LENGTH_LONG
-                        ).show()
-                        navController.popBackStack()
-                    }
+                viewModel = viewModel
+            ) {
+                lifecycleScope.launch {
+                    googleAuthUiClient.signOut()
+                    Toast.makeText(
+                        applicationContext,
+                        applicationContext.resources.getString(R.string.toast_sign_out),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    navController.popBackStack()
                 }
-            )
+            }
         }
 
         composable(route = Screen.EmailSignUpScreen.route){
-            val emailAuthClient = EmailAuthClient(viewModel.auth)
             LaunchedEffect(key1 = signInState.signInSuccessful){
                 if (signInState.signInSuccessful) {
                     Toast.makeText(
@@ -133,7 +150,6 @@ fun AppNavigation(
         }
 
         composable(route = Screen.EmailSignInScreen.route){
-            val emailAuthClient = EmailAuthClient(viewModel.auth)
             LaunchedEffect(key1 = signInState.signInSuccessful){
                 if (signInState.signInSuccessful) {
                     Toast.makeText(

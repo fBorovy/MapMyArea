@@ -43,6 +43,7 @@ class GoogleAuthClient(
                     UserData(
                         userId = uid,
                         username = displayName,
+                        savedMaps = emptyList()
                     )
                 },
                 errorMessage = null

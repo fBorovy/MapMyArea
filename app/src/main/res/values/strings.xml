@@ -16,4 +16,6 @@
     <string name="sign_in">Sign in</string>
     <string name="toast_sign_in">Signed in successfully</string>
     <string name="toast_sign_out">Signed out successfully</string>
+    <string name="enter_username">Username</string>
+    <string name="short_password_error">Password must contain at least 10 characters.</string>
 </resources>

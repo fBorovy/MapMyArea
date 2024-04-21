@@ -46,6 +46,7 @@ fun EmailSignUpScreen(
 ) {
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password1 by remember { mutableStateOf("") }
     var password2 by remember { mutableStateOf("") }
 
@@ -88,58 +89,27 @@ fun EmailSignUpScreen(
                 placeholder = { Text(context.resources.getString(R.string.enter_email)) },
                 isHidden = false
             )
+            Spacer(modifier = Modifier.height(15.dp))
+            MMATextField(
+                value = username,
+                onValueChange = {username = it},
+                placeholder = { Text(context.resources.getString(R.string.enter_username)) },
+                isHidden = false
+            )
             Spacer(modifier = Modifier.height(30.dp))
             MMATextField(
                 value = password1,
-                onValueChange = {password1 = it},
+                onValueChange = { password1 = it },
                 placeholder = { Text(context.resources.getString(R.string.enter_password)) },
                 isHidden = true
             )
-//            OutlinedTextField(
-//                value = password1,
-//                onValueChange = { password1 = it },
-//                placeholder = { Text(context.resources.getString(R.string.enter_password)) },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .clip(RoundedCornerShape(15.dp))
-//                    .border(
-//                        shape = RoundedCornerShape(15.dp),
-//                        width = 2.dp,
-//                        color = TextFieldGray
-//                    ),
-//                colors = OutlinedTextFieldDefaults.colors(
-//                    unfocusedTextColor = TextFieldGray,
-//                    unfocusedPlaceholderColor = TextFieldGray,
-//                    focusedTextColor = ButtonBlack,
-//                    focusedPlaceholderColor = ButtonBlack,
-//                ),
-//            )
             Spacer(modifier = Modifier.height(15.dp))
             MMATextField(
                 value = password2,
                 onValueChange = {password2 = it},
                 placeholder = { Text(context.resources.getString(R.string.confirm_password)) },
-                isHidden = false
+                isHidden = true
             )
-//            OutlinedTextField(
-//                value = password2,
-//                onValueChange = { password2 = it },
-//                placeholder = { Text(context.resources.getString(R.string.confirm_password)) },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .clip(RoundedCornerShape(15.dp))
-//                    .border(
-//                        shape = RoundedCornerShape(15.dp),
-//                        width = 2.dp,
-//                        color = TextFieldGray
-//                    ),
-//                colors = OutlinedTextFieldDefaults.colors(
-//                    unfocusedTextColor = TextFieldGray,
-//                    unfocusedPlaceholderColor = TextFieldGray,
-//                    focusedTextColor = ButtonBlack,
-//                    focusedPlaceholderColor = ButtonBlack,
-//                ),
-//            )
             Spacer(modifier = Modifier.weight(1f))
             Box(
                 modifier = Modifier
@@ -149,7 +119,7 @@ fun EmailSignUpScreen(
                     .background(ButtonBlack)
                     .padding(13.dp)
                     .clickable {
-                        emailAuthClient.signUpWithEmail(email, password2) {
+                        emailAuthClient.signUpWithEmail(email, password2, username) {
                             onSignUpClick(it)
                         }
                     },

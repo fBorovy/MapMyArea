@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +30,6 @@ import com.fborowy.mapmyarea.domain.SignInResult
 import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
 import com.fborowy.mapmyarea.presentation.components.MMATextField
 import com.fborowy.mapmyarea.ui.theme.ButtonBlack
-import com.fborowy.mapmyarea.ui.theme.TextFieldGray
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
 
@@ -85,25 +82,6 @@ fun EmailSignInScreen(
                 placeholder = { Text(text = context.resources.getString(R.string.enter_email_or_username)) },
                 isHidden = false
             )
-//            OutlinedTextField(
-//                value = email,
-//                onValueChange = { email = it },
-//                placeholder = { Text(text = context.resources.getString(R.string.enter_email_or_username)) },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .clip(RoundedCornerShape(15.dp))
-//                    .border(
-//                        shape = RoundedCornerShape(15.dp),
-//                        width = 2.dp,
-//                        color = TextFieldGray
-//                    ),
-//                colors = OutlinedTextFieldDefaults.colors(
-//                    unfocusedTextColor = TextFieldGray,
-//                    unfocusedPlaceholderColor = TextFieldGray,
-//                    focusedTextColor = ButtonBlack,
-//                    focusedPlaceholderColor = ButtonBlack,
-//                ),
-//            )
             Spacer(modifier = Modifier.height(15.dp))
             MMATextField(
                 value = password,
@@ -111,25 +89,6 @@ fun EmailSignInScreen(
                 placeholder = { Text(context.resources.getString(R.string.enter_password)) },
                 isHidden = true
             )
-//            OutlinedTextField(
-//                value = password,
-//                onValueChange = { password = it },
-//                placeholder = { Text(context.resources.getString(R.string.enter_password)) },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .clip(RoundedCornerShape(15.dp))
-//                    .border(
-//                        shape = RoundedCornerShape(15.dp),
-//                        width = 2.dp,
-//                        color = TextFieldGray
-//                    ),
-//                colors = OutlinedTextFieldDefaults.colors(
-//                    unfocusedTextColor = TextFieldGray,
-//                    unfocusedPlaceholderColor = TextFieldGray,
-//                    focusedTextColor = ButtonBlack,
-//                    focusedPlaceholderColor = ButtonBlack,
-//                ),
-//            )
             Spacer(modifier = Modifier.weight(1f))
             Box(
                 modifier = Modifier
