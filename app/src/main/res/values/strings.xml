@@ -12,10 +12,13 @@
     <string name="go_back">Go back</string>
     <string name="enter_password">Password</string>
     <string name="confirm_password">Confirm password</string>
-    <string name="enter_email_or_username">Enter username or email address</string>
     <string name="sign_in">Sign in</string>
     <string name="toast_sign_in">Signed in successfully</string>
     <string name="toast_sign_out">Signed out successfully</string>
     <string name="enter_username">Username</string>
     <string name="short_password_error">Password must contain at least 10 characters.</string>
+    <string name="passwords_differ_error">Passwords must be the same</string>
+    <string name="check_email_error">Sign up not possible, check if the e-mail address is correct</string>
+    <string name="empty_email_error">Fill the email field</string>
+    <string name="failed_to_sign_in">Signing in failed, please check credentials</string>
 </resources>

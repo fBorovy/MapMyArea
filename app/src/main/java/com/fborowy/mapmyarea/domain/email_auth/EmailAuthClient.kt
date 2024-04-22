@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.fborowy.mapmyarea.data.UserData
 import com.fborowy.mapmyarea.domain.SignInResult
+import com.fborowy.mapmyarea.domain.trimEmail
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.concurrent.CancellationException
@@ -12,18 +13,18 @@ class EmailAuthClient(
     private val auth: FirebaseAuth,
     private val database: FirebaseFirestore
 ): ViewModel() {
-    fun signUpWithEmail(email: String, password: String, username: String, onComplete: (SignInResult) -> Unit) {
+    fun signUpWithEmail(email: String, password: String, onComplete: (SignInResult) -> Unit) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 val result = if (task.isSuccessful) {
                     val user = auth.currentUser
                     val newFirestoreUser = hashMapOf(
-                        "username" to username,
+                        "username" to trimEmail(user?.email!!),
                         "savedMaps" to null,
                     )
-                    Log.d("FIRE", "${user?.uid}")
+                    Log.d("FIRE", user.uid)
                     database.collection("users")
-                        .document(user!!.uid)
+                        .document(user.uid)
                         .set(newFirestoreUser)
                         .addOnSuccessListener { Log.d("AAAA", "DocumentSnapshot successfully written!") }
                         .addOnFailureListener { e -> Log.w("AAAA", "Error writing document", e) }
@@ -32,7 +33,7 @@ class EmailAuthClient(
                         data = user.run {
                             UserData(
                                 userId = uid,
-                                username = username,
+                                username = trimEmail(email),
                                 savedMaps = emptyList()
                             )
                         },
@@ -49,6 +50,12 @@ class EmailAuthClient(
                 }
                 onComplete(result)
             }
+            .addOnFailureListener { exception ->
+                onComplete(SignInResult(
+                    null,
+                    errorMessage = exception.message
+                ))
+            }
     }
 
     fun signInWithEmail(email: String, password: String, onComplete: (SignInResult) -> Unit){
@@ -60,7 +67,7 @@ class EmailAuthClient(
                         data = user?.run {
                             UserData(
                                 userId = uid,
-                                username = displayName,
+                                username = trimEmail(email),
                                 savedMaps = emptyList()
                             )
                         },

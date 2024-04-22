@@ -1,8 +1,8 @@
 package com.fborowy.mapmyarea.presentation.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,7 +81,7 @@ fun EmailSignInScreen(
             MMATextField(
                 value = email,
                 onValueChange = { email = it },
-                placeholder = { Text(text = context.resources.getString(R.string.enter_email_or_username)) },
+                placeholder = { Text(text = context.resources.getString(R.string.enter_email)) },
                 isHidden = false
             )
             Spacer(modifier = Modifier.height(15.dp))
@@ -98,10 +100,18 @@ fun EmailSignInScreen(
                     .background(ButtonBlack)
                     .padding(13.dp)
                     .clickable {
-                        emailAuthClient.signInWithEmail(
-                            email,
-                            password
-                        ) { onSignInClick(it) }
+                        try {
+                            emailAuthClient.signInWithEmail(
+                                email,
+                                password
+                            ) { onSignInClick(it) }
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                context,
+                                context.resources.getString(R.string.failed_to_sign_in),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     },
                 contentAlignment = Alignment.Center,
             ) {

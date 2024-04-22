@@ -122,7 +122,7 @@ fun AppNavigation(
                         applicationContext.resources.getString(R.string.toast_sign_out),
                         Toast.LENGTH_LONG
                     ).show()
-                    navController.popBackStack()
+                    navController.popBackStack(Screen.StartScreen.route, false)
                 }
             }
         }

@@ -29,42 +29,11 @@ class AppViewModel: ViewModel() {
         _signInState.update { SignInState() }
     }
 
-//    fun getSignedUserInfo(onComplete: (UserData) -> Unit) {
-//        return if (signedWithGoogle) getSignedGoogleUserInfo{ onComplete(it) }
-//        else getSignedEmailUserInfo { onComplete(it) }
-//    }
     suspend fun getSignedUserInfo(): UserData {
         return if (signedWithGoogle) getSignedGoogleUserInfo()
         else getSignedEmailUserInfo()
     }
 
-//    private fun getSignedGoogleUserInfo(onComplete: (UserData) -> Unit) {
-//        val savedMaps = mutableListOf<MapData>()
-//        database.collection("users")
-//            .document(auth.currentUser!!.uid)
-//            .collection("savedMaps")
-//            .get()
-//            .addOnSuccessListener { result ->
-//                for (document in result) {
-//                    savedMaps.add(
-//                        MapData(
-//                            mapId = document.id,
-//                            northLimit = document.getString("northLimit"),
-//                            westLimit = document.getString("westLimit"),
-//                            southLimit = document.getString("southLimit"),
-//                            eastLimit = document.getString("eastLimit"),
-//                        )
-//                    )
-//                }
-//                val userData =
-//                    UserData(
-//                        userId = auth.currentUser?.uid,
-//                        username = auth.currentUser?.displayName,
-//                        savedMaps = savedMaps
-//                    )
-//                onComplete(userData)
-//            }
-//    }
     private suspend fun getSignedGoogleUserInfo(): UserData {
         val savedMaps = mutableListOf<MapData>()
         val snapshot = database.collection("users")
@@ -94,13 +63,9 @@ class AppViewModel: ViewModel() {
     private suspend fun getSignedEmailUserInfo(): UserData {
         val savedMaps = mutableListOf<MapData>()
 
-        val snapshot = database.collection("users")
+        val result = database.collection("users")
             .document(auth.currentUser!!.uid)
-
-        val user = snapshot.get().await()
-        val username = user.getString("username")
-
-        val result = snapshot.collection("savedMaps")
+            .collection("savedMaps")
             .get()
             .await()
 
@@ -118,44 +83,9 @@ class AppViewModel: ViewModel() {
 
         return UserData(
             userId = auth.currentUser!!.uid,
-            username = username,
+            username = trimEmail(auth.currentUser!!.email!!),
             savedMaps = savedMaps
         )
 
     }
-//    private fun getSignedEmailUserInfo(): {
-//        val savedMaps = mutableListOf<MapData>()
-//        var username: String?
-//
-//        database.collection("users")
-//            .document(auth.currentUser!!.uid)
-//            .get()
-//            .addOnSuccessListener { snapshot ->
-//                username = snapshot.getString("username")
-//
-//                database.collection("users")
-//                    .document(auth.currentUser!!.uid)
-//                    .collection("savedMaps")
-//                    .get()
-//                    .addOnSuccessListener { maps ->
-//                        for (document in maps.documents) {
-//                            savedMaps.add(
-//                                MapData(
-//                                    mapId = document.id,
-//                                    northLimit = document.getString("northLimit"),
-//                                    westLimit = document.getString("westLimit"),
-//                                    southLimit = document.getString("southLimit"),
-//                                    eastLimit = document.getString("eastLimit"),
-//                                )
-//                            )
-//                        }
-//                        val userData = UserData(
-//                                userId = auth.currentUser?.uid,
-//                                username = username?: "",
-//                                savedMaps = savedMaps
-//                            )
-//                        onComplete(userData)
-//                    }
-//            }
-//    }
 }

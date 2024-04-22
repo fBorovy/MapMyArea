@@ -1,8 +1,9 @@
 package com.fborowy.mapmyarea.presentation.screens
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,14 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,10 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.domain.SignInResult
+import com.fborowy.mapmyarea.domain.ValidateCredentialsViewModel
 import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
 import com.fborowy.mapmyarea.presentation.components.MMATextField
 import com.fborowy.mapmyarea.ui.theme.ButtonBlack
-import com.fborowy.mapmyarea.ui.theme.TextFieldGray
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
 
@@ -45,10 +41,7 @@ fun EmailSignUpScreen(
     onSignUpClick: (SignInResult) -> Unit,
 ) {
     val context = LocalContext.current
-    var email by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var password1 by remember { mutableStateOf("") }
-    var password2 by remember { mutableStateOf("") }
+    val validationViewModel = remember { ValidateCredentialsViewModel() }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -84,29 +77,22 @@ fun EmailSignUpScreen(
                 .padding(horizontal = 50.dp, vertical = 60.dp)
         ) {
             MMATextField(
-                value = email,
-                onValueChange = {email = it},
+                value = validationViewModel.email,
+                onValueChange = {validationViewModel.email = it},
                 placeholder = { Text(context.resources.getString(R.string.enter_email)) },
-                isHidden = false
-            )
-            Spacer(modifier = Modifier.height(15.dp))
-            MMATextField(
-                value = username,
-                onValueChange = {username = it},
-                placeholder = { Text(context.resources.getString(R.string.enter_username)) },
                 isHidden = false
             )
             Spacer(modifier = Modifier.height(30.dp))
             MMATextField(
-                value = password1,
-                onValueChange = { password1 = it },
+                value = validationViewModel.password1,
+                onValueChange = { validationViewModel.password1 = it },
                 placeholder = { Text(context.resources.getString(R.string.enter_password)) },
                 isHidden = true
             )
             Spacer(modifier = Modifier.height(15.dp))
             MMATextField(
-                value = password2,
-                onValueChange = {password2 = it},
+                value = validationViewModel.password2,
+                onValueChange = {validationViewModel.password2 = it},
                 placeholder = { Text(context.resources.getString(R.string.confirm_password)) },
                 isHidden = true
             )
@@ -119,8 +105,24 @@ fun EmailSignUpScreen(
                     .background(ButtonBlack)
                     .padding(13.dp)
                     .clickable {
-                        emailAuthClient.signUpWithEmail(email, password2, username) {
-                            onSignUpClick(it)
+                        val result = validationViewModel.validate()
+                        if (result != 0) showRegisteringErrorMessage(context, error = result)
+                        else {
+                            try {
+                                emailAuthClient.signUpWithEmail(
+                                    validationViewModel.email,
+                                    validationViewModel.password2,
+                                ) {
+                                    onSignUpClick(it)
+                                }
+                            } catch (e: Exception) {
+                                Toast.makeText(
+                                    context,
+                                    context.resources.getString(R.string.failed_to_sign_in),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+
                         }
                     },
                 contentAlignment = Alignment.Center,
@@ -128,5 +130,27 @@ fun EmailSignUpScreen(
                 Text(text = context.resources.getString(R.string.register), style = Typography.titleMedium)
             }
         }
+    }
+}
+
+
+fun showRegisteringErrorMessage(context: Context, error: Int) {
+
+    when (error) {
+        1 -> Toast.makeText(
+            context,
+            context.resources.getString(R.string.short_password_error),
+            Toast.LENGTH_LONG
+        ).show()
+        2 -> Toast.makeText(
+            context,
+            context.resources.getString(R.string.passwords_differ_error),
+            Toast.LENGTH_LONG
+        ).show()
+        3 -> Toast.makeText(
+            context,
+            context.resources.getString(R.string.empty_email_error),
+            Toast.LENGTH_LONG
+        ).show()
     }
 }

@@ -11,10 +11,12 @@
     <string name="go_back">Wróć</string>
     <string name="enter_password">Hasło</string>
     <string name="confirm_password">Powtórz hasło</string>
-    <string name="enter_email_or_username">Nazwa użytkownika lub adres email</string>
     <string name="sign_in">Zaloguj</string>
     <string name="toast_sign_in">Zalogowano pomyśłnie</string>
     <string name="toast_sign_out">Wylogowano pomyślnie</string>
     <string name="enter_username">Nazwa użytkownika</string>
     <string name="short_password_error">Hasło musi składać się z conajmniej 10 znaków.</string>
+    <string name="passwords_differ_error">Hasła muszą być takie same</string>
+    <string name="check_email_error">Rejestracja nie możliwa, sprawdź poprawność adresu email</string>
+    <string name="empty_email_error">Wprowadź adres e-mail</string>
 </resources>
