@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.data.UserData
 import com.fborowy.mapmyarea.domain.AppViewModel
+import com.fborowy.mapmyarea.presentation.components.MMADropDownMenuItem
 import com.fborowy.mapmyarea.ui.theme.DropDownMenuGray
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
@@ -37,6 +37,7 @@ import com.fborowy.mapmyarea.ui.theme.Typography
 fun HomeScreen(
     viewModel: AppViewModel,
     onSignOut: () -> Unit,
+    onCreateMap: () -> Unit,
 ) {
     val context = LocalContext.current
     var userData by remember { mutableStateOf<UserData?>(null) }
@@ -91,17 +92,8 @@ fun HomeScreen(
                             modifier = Modifier
                                 .background(DropDownMenuGray)
                         ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        context.getString(R.string.signOut),
-                                        style = Typography.bodySmall
-                                    )
-                                       },
-                                onClick = { onSignOut() },
-                                modifier = Modifier
-                                    .background(DropDownMenuGray)
-                            )
+                            MMADropDownMenuItem(context.getString(R.string.create_map)) { onCreateMap() }
+                            MMADropDownMenuItem(context.getString(R.string.signOut)) { onSignOut() }
                         }
                     }
                 }

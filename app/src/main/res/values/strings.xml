@@ -21,4 +21,6 @@
     <string name="check_email_error">Sign up not possible, check if the e-mail address is correct</string>
     <string name="empty_email_error">Fill the email field</string>
     <string name="failed_to_sign_in">Signing in failed, please check credentials</string>
+    <string name="create_map">Create map</string>
+    <string name="map_creator_screen_title">New map creator</string>
 </resources>

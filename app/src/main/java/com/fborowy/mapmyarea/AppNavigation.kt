@@ -22,6 +22,7 @@ import com.fborowy.mapmyarea.domain.google_auth.GoogleAuthClient
 import com.fborowy.mapmyarea.presentation.screens.EmailSignInScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignUpScreen
 import com.fborowy.mapmyarea.presentation.screens.HomeScreen
+import com.fborowy.mapmyarea.presentation.screens.MapCreatorScreen
 import com.fborowy.mapmyarea.presentation.screens.StartScreen
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
@@ -113,18 +114,22 @@ fun AppNavigation(
 
         composable(route = Screen.HomeScreen.route){
             HomeScreen(
-                viewModel = viewModel
-            ) {
-                lifecycleScope.launch {
-                    googleAuthUiClient.signOut()
-                    Toast.makeText(
-                        applicationContext,
-                        applicationContext.resources.getString(R.string.toast_sign_out),
-                        Toast.LENGTH_LONG
-                    ).show()
-                    navController.popBackStack(Screen.StartScreen.route, false)
+                viewModel = viewModel,
+                onSignOut = {
+                    lifecycleScope.launch {
+                        googleAuthUiClient.signOut()
+                        Toast.makeText(
+                            applicationContext,
+                            applicationContext.resources.getString(R.string.toast_sign_out),
+                            Toast.LENGTH_LONG
+                        ).show()
+                        navController.popBackStack(Screen.StartScreen.route, false)
+                    }
+                },
+                onCreateMap = {
+                    navController.navigate(Screen.MapCreatorScreen.route)
                 }
-            }
+            )
         }
 
         composable(route = Screen.EmailSignUpScreen.route){
@@ -165,6 +170,12 @@ fun AppNavigation(
             EmailSignInScreen(navController = navController, emailAuthClient, onSignInClick = {
                 viewModel.onSignIn(it)
             })
+        }
+        composable(route = Screen.MapCreatorScreen.route) {
+            MapCreatorScreen(
+                viewModel = viewModel,
+                navController,
+            )
         }
     }
 }
