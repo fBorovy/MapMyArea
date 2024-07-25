@@ -1,5 +1,6 @@
 package com.fborowy.mapmyarea.presentation.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,26 +15,35 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
+import com.fborowy.mapmyarea.domain.MapCreatorViewModel
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 
 @Composable
-fun MapCreatorScreen(
-    viewModel: ViewModel,
+fun MapCreatorScreen2(
+    mapCreatorViewModel: MapCreatorViewModel,
     navController: NavController
 ) {
-    val context = LocalContext.current
+    var isInstructionPopupVisible by remember { mutableStateOf(false) }
+
+    Log.d("MOJE", "${mapCreatorViewModel.getBoundaries()}")
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -49,20 +59,25 @@ fun MapCreatorScreen(
                     )
                 )
                 .padding(vertical = 20.dp),
-            contentAlignment = Alignment.Center
         ) {
             Box(
                 modifier = Modifier
                     .align(alignment = Alignment.CenterStart)
-                    .padding(start = 20.dp)
-                    .clickable { navController.popBackStack() }
+                    .padding(start = 15.dp)
+                    .clickable { navController.popBackStack() },
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.baseline_arrow_back_40),
-                    contentDescription = context.getString(R.string.go_back),
+                    contentDescription = stringResource(id = R.string.go_back),
                 )
             }
-            Text(context.resources.getString(R.string.map_creator_screen_title), style = Typography.titleMedium, modifier = Modifier.padding(horizontal = 84.dp))
+            Text(
+                text = stringResource(R.string.map_creator_screen_title),
+                style = Typography.titleMedium,
+                modifier = Modifier
+                    .padding(horizontal = 74.dp)
+                    .align(Alignment.CenterStart)
+            )
             Box(
                 modifier = Modifier
                     .align(alignment = Alignment.CenterEnd)
@@ -70,15 +85,38 @@ fun MapCreatorScreen(
                     .size(44.dp)
                     .border(1.dp, TextWhite, RoundedCornerShape(22.dp))
                     .clip(RoundedCornerShape(22.dp))
-                    .clickable { },
+                    .clickable {
+                        isInstructionPopupVisible = !isInstructionPopupVisible
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = "?", style = Typography.titleLarge)
             }
         }
-        
 
+        val mapUiSettings = MapUiSettings(
+            rotationGesturesEnabled = true,
+            myLocationButtonEnabled = true, //isMyLocationEnabled has to be true too to display it
+            compassEnabled = true,
+            //mapToolbarEnabled = false,
+        )
+
+        GoogleMap(
+            properties = MapProperties(
+                isMyLocationEnabled = true, //app must have a localisation permission first in order to enable it
+                latLngBoundsForCameraTarget = mapCreatorViewModel.getBoundaries(),
+                minZoomPreference = 16f,
+                maxZoomPreference = 20f
+            ),
+            //onMyLocationButtonClick = { false },
+            uiSettings = mapUiSettings,
+            onMapClick = {
+
+            },
+        )
 
 
     }
 }
+
+

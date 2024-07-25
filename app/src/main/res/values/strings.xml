@@ -8,7 +8,7 @@
     <string name="user_maps">Saved maps</string>
     <string name="user">User</string>
     <string name="signOut">Sign out</string>
-    <string name="enter_email">E-mail addres</string>
+    <string name="enter_email">E-mail address</string>
     <string name="go_back">Go back</string>
     <string name="enter_password">Password</string>
     <string name="confirm_password">Confirm password</string>
@@ -23,4 +23,13 @@
     <string name="failed_to_sign_in">Signing in failed, please check credentials</string>
     <string name="create_map">Create map</string>
     <string name="map_creator_screen_title">New map creator</string>
+    <string name="toast_location_permission_denied">Cannot use this funcionality without location permission</string>
+    <string name="localisation_permanently_declined_dialog">Funcinality only available with lacation permission granted, to do so go to app settings</string>
+    <string name="localisation_permission_request">Allow MapMyArea app to acces location?</string>
+    <string name="settings">Settings</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="enable">Allow</string>
+    <string name="proceed">Next</string>
+    <string name="map_boundaries_not_set">Select the map boundaries first</string>
+    <string name="set_map_boundaries_instruction">In this step you want to define your map boundaries. In order to do that select two spots on the displayed map corresponding to two corners of the territory you want to include in your map. To reset this setting long click on the map.</string>
 </resources>

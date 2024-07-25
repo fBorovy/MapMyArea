@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.googleSecrets)
 }
 
 android {
@@ -79,5 +80,9 @@ dependencies {
     implementation(libs.androidx.navigation)
     implementation(libs.androidx.lifecycle)
 
+    //Google Maps
+    implementation(libs.google.maps.compose)
 
+    //viewModel
+    implementation(libs.viewModel)
 }

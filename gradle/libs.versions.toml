@@ -15,6 +15,9 @@ play = "21.0.0"
 firebaseAuthKtx = "22.3.1"
 navVersion = "2.7.7"
 lifecycle = "2.6.0"
+googleMaps = "4.3.3"
+googleSecrets = "0.4"
+viewModel = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,8 +41,11 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx",
 androidx-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navVersion" }
 androidx-lifecycle = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+google-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "googleMaps"}
+viewModel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "viewModel" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "google" }
+googleSecrets = { id = "com.google.secrets_gradle_plugin", version.ref = 'googleSecrets'}

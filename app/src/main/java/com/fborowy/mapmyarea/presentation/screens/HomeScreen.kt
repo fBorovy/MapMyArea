@@ -35,14 +35,14 @@ import com.fborowy.mapmyarea.ui.theme.Typography
 
 @Composable
 fun HomeScreen(
-    viewModel: AppViewModel,
+    appViewModel: AppViewModel,
     onSignOut: () -> Unit,
     onCreateMap: () -> Unit,
 ) {
     val context = LocalContext.current
     var userData by remember { mutableStateOf<UserData?>(null) }
     LaunchedEffect(key1 = Unit){
-        userData = viewModel.getSignedUserInfo()
+        userData = appViewModel.getSignedUserInfo()
     }
     var isMenuVisible by remember { mutableStateOf(false) }
 
@@ -92,7 +92,10 @@ fun HomeScreen(
                             modifier = Modifier
                                 .background(DropDownMenuGray)
                         ) {
-                            MMADropDownMenuItem(context.getString(R.string.create_map)) { onCreateMap() }
+                            MMADropDownMenuItem(context.getString(R.string.create_map)) {
+                                isMenuVisible = false
+                                onCreateMap()
+                            }
                             MMADropDownMenuItem(context.getString(R.string.signOut)) { onSignOut() }
                         }
                     }

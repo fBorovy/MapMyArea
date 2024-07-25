@@ -63,7 +63,7 @@ fun EmailSignInScreen(
             Box(
                 modifier = Modifier
                     .align(alignment = Alignment.CenterStart)
-                    .padding(start = 20.dp)
+                    .padding(start = 15.dp)
                     .clickable { navController.popBackStack() }
             ) {
                 Image(

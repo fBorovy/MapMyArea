@@ -12,11 +12,23 @@
     <string name="enter_password">Hasło</string>
     <string name="confirm_password">Powtórz hasło</string>
     <string name="sign_in">Zaloguj</string>
-    <string name="toast_sign_in">Zalogowano pomyśłnie</string>
+    <string name="toast_sign_in">Zalogowano pomyślnie</string>
     <string name="toast_sign_out">Wylogowano pomyślnie</string>
     <string name="enter_username">Nazwa użytkownika</string>
     <string name="short_password_error">Hasło musi składać się z conajmniej 10 znaków.</string>
     <string name="passwords_differ_error">Hasła muszą być takie same</string>
     <string name="check_email_error">Rejestracja nie możliwa, sprawdź poprawność adresu email</string>
     <string name="empty_email_error">Wprowadź adres e-mail</string>
+    <string name="failed_to_sign_in">Logowanie nie powiodło się, sprawdź wprowadzone dane</string>
+    <string name="create_map">Stwórz mapę</string>
+    <string name="map_creator_screen_title">Kreator nowej mapy</string>
+    <string name="toast_location_permission_denied">Funkcjonalność nie jest dostępna bez uprawnień lokalizacji</string>
+    <string name="localisation_permanently_declined_dialog">Funkcjonalność niedostępna bez uprawnień lokalizacji, aby nadać uprawnienia, przejdź do ustawień aplikacji</string>
+    <string name="localisation_permission_request">Zezwolić aplikacji MapMyArea na dostęp do lokalizacji?</string>
+    <string name="settings">Ustawienia</string>
+    <string name="dismiss">Odrzuć</string>
+    <string name="enable">Zezwól</string>
+    <string name="proceed">Dalej</string>
+    <string name="map_boundaries_not_set">Ustal granice mapy zanim przejdziesz dalej</string>
+    <string name="set_map_boundaries_instruction">W tym kroku określ granice twojej mapy. W tym celu wybierz dwa punkty na wyświetlanej mapie odpowiadające dwóm narożnikom terytorium, które chcesz zawrzeć w swojej mapie. Aby zresetować ustawianie klknij i przytrzymaj w dowolnym miejscu na mapie.</string>
 </resources>

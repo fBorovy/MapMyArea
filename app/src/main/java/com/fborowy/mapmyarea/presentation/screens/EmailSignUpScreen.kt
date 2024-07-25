@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.domain.SignInResult
@@ -41,7 +41,7 @@ fun EmailSignUpScreen(
     onSignUpClick: (SignInResult) -> Unit,
 ) {
     val context = LocalContext.current
-    val validationViewModel = remember { ValidateCredentialsViewModel() }
+    val validationViewModel = viewModel<ValidateCredentialsViewModel>()
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -61,7 +61,7 @@ fun EmailSignUpScreen(
             Box(
                 modifier = Modifier
                     .align(alignment = Alignment.CenterStart)
-                    .padding(start = 20.dp)
+                    .padding(start = 15.dp)
                     .clickable { navController.popBackStack() }
             ) {
                 Image(
@@ -78,21 +78,21 @@ fun EmailSignUpScreen(
         ) {
             MMATextField(
                 value = validationViewModel.email,
-                onValueChange = {validationViewModel.email = it},
+                onValueChange = { validationViewModel.updateEmailField(it) },
                 placeholder = { Text(context.resources.getString(R.string.enter_email)) },
                 isHidden = false
             )
             Spacer(modifier = Modifier.height(30.dp))
             MMATextField(
                 value = validationViewModel.password1,
-                onValueChange = { validationViewModel.password1 = it },
+                onValueChange = { validationViewModel.updatePassword1Field(it) },
                 placeholder = { Text(context.resources.getString(R.string.enter_password)) },
                 isHidden = true
             )
             Spacer(modifier = Modifier.height(15.dp))
             MMATextField(
                 value = validationViewModel.password2,
-                onValueChange = {validationViewModel.password2 = it},
+                onValueChange = { validationViewModel.updatePassword2Field(it) },
                 placeholder = { Text(context.resources.getString(R.string.confirm_password)) },
                 isHidden = true
             )
