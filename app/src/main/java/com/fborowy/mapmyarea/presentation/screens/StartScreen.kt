@@ -19,11 +19,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.domain.Screen
-import com.fborowy.mapmyarea.domain.SignInState
+import com.fborowy.mapmyarea.domain.states.SignInState
 import com.fborowy.mapmyarea.ui.theme.ButtonBlack
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
@@ -63,6 +64,16 @@ fun StartScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(context.resources.getString(R.string.app_name), style = Typography.titleLarge)
+            Text(
+                text = stringResource(id = R.string.credits),
+                style = Typography.bodySmall,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 15.dp)
+                    .clickable {
+                        navController.navigate(Screen.CreditsScreen.route)
+                    }
+            )
         }
         Box(
             modifier = Modifier

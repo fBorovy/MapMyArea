@@ -3,7 +3,7 @@ package com.fborowy.mapmyarea.domain.email_auth
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.fborowy.mapmyarea.data.UserData
-import com.fborowy.mapmyarea.domain.SignInResult
+import com.fborowy.mapmyarea.domain.states.SignInResult
 import com.fborowy.mapmyarea.domain.trimEmail
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -51,10 +51,12 @@ class EmailAuthClient(
                 onComplete(result)
             }
             .addOnFailureListener { exception ->
-                onComplete(SignInResult(
+                onComplete(
+                    SignInResult(
                     null,
                     errorMessage = exception.message
-                ))
+                )
+                )
             }
     }
 

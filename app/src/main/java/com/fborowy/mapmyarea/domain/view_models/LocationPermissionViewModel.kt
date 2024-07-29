@@ -1,4 +1,4 @@
-package com.fborowy.mapmyarea.domain
+package com.fborowy.mapmyarea.domain.view_models
 
 import android.Manifest
 import android.content.Context

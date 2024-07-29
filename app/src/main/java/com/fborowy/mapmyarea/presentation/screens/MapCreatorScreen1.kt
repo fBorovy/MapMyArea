@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,14 +31,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.domain.MapCreatorViewModel
 import com.fborowy.mapmyarea.domain.Screen
+import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
+import com.fborowy.mapmyarea.presentation.components.MapStyle
 import com.fborowy.mapmyarea.ui.theme.ButtonBlack
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -54,9 +56,8 @@ fun MapCreatorScreen1(
     val context = LocalContext.current
     var isInstructionPopupVisible by remember { mutableStateOf(false) }
 
-    var clickCount by remember { mutableIntStateOf(0) }
-    var corner1position by remember { mutableStateOf<LatLng?>(null) }
-    var corner2position by remember { mutableStateOf<LatLng?>(null) }
+    val corner1 by mapCreatorViewModel.corner1position.collectAsState()
+    val corner2 by mapCreatorViewModel.corner2position.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -77,7 +78,10 @@ fun MapCreatorScreen1(
                 modifier = Modifier
                     .align(alignment = Alignment.CenterStart)
                     .padding(start = 15.dp)
-                    .clickable { navController.popBackStack() },
+                    .clickable {
+                        mapCreatorViewModel.resetNewMapState()
+                        navController.popBackStack()
+                    },
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.baseline_arrow_back_40),
@@ -115,40 +119,34 @@ fun MapCreatorScreen1(
         )
 
         GoogleMap(
-            properties = MapProperties(isMyLocationEnabled = true), //app must have a localisation permission first in order to enable it
+            properties = MapProperties(
+                isMyLocationEnabled = true,
+                mapStyleOptions = MapStyleOptions(MapStyle.mapStyleJson)
+            ), //app must have a localisation permission first in order to enable it
             //onMyLocationButtonClick = { false },
             uiSettings = mapUiSettings,
             onMapClick = { latLng ->
-                if (clickCount == 0) {
-                    clickCount = 1
-                    corner1position = latLng
-                }
-                else if (clickCount == 1) {
-                    clickCount = 2
-                    corner2position = latLng
-                }
+                mapCreatorViewModel.setCorner(latLng)
             },
             onMapLongClick = {
-                clickCount = 0
-                corner1position = null
-                corner2position = null
+                mapCreatorViewModel.resetCorners()
             }
         ) {
-            corner1position?.let {
+            corner1?.let {
                 Marker(
                     state = MarkerState(position = it),
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                 )
             }
-            corner2position?.let {
+            corner2?.let {
                 Marker(
                     state = MarkerState(position = it),
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
 
                 )
             }
-            corner1position?.let { corner1 ->
-                corner2position?.let { marker2 ->
+            corner1?.let { corner1 ->
+                corner2?.let { marker2 ->
                     Polygon(
                         points = listOf(
                             LatLng(corner1.latitude, corner1.longitude),
@@ -156,8 +154,8 @@ fun MapCreatorScreen1(
                             LatLng(marker2.latitude, marker2.longitude),
                             LatLng(corner1.latitude, marker2.longitude)
                         ),
-                        fillColor = Color(0x330000FF), // Kolor wypełnienia
-                        strokeColor = Color.Blue // Kolor obramowania
+                        fillColor = Color(0x330000FF),
+                        strokeColor = Color.Blue
                     )
                 }
             }
@@ -178,20 +176,31 @@ fun MapCreatorScreen1(
                 .background(ButtonBlack)
                 .padding(13.dp)
                 .clickable {
-                    if (clickCount == 2 && mapCreatorViewModel.isAreaWithinLimit(3.0, corner1position, corner2position)) {
-                        mapCreatorViewModel.setBoundaries(corner1position, corner2position)
-                        navController.navigate(Screen.MapCreatorScreen2.route)
-                    } else {
-                        clickCount = 0
-                        corner1position = null
-                        corner2position = null
-                        Toast
-                            .makeText(
-                                context,
-                                context.getString(R.string.map_boundaries_not_set),
-                                Toast.LENGTH_LONG
-                            )
-                            .show()
+                    val result = mapCreatorViewModel.setBoundaries()
+                    when (result) {
+                        0 -> {
+                            navController.navigate(Screen.MapCreatorScreen2.route)
+                        }
+
+                        1 -> {
+                            Toast
+                                .makeText(
+                                    context,
+                                    context.getString(R.string.map_boundaries_not_set),
+                                    Toast.LENGTH_LONG
+                                )
+                                .show()
+                        }
+
+                        2 -> {
+                            Toast
+                                .makeText(
+                                    context,
+                                    context.getString(R.string.map_boundaries_not_within_limit),
+                                    Toast.LENGTH_LONG
+                                )
+                                .show()
+                        }
                     }
                 },
             contentAlignment = Alignment.Center,

@@ -17,13 +17,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.fborowy.mapmyarea.domain.AppViewModel
-import com.fborowy.mapmyarea.domain.LocationPermissionViewModel
-import com.fborowy.mapmyarea.domain.MapCreatorViewModel
 import com.fborowy.mapmyarea.domain.Screen
 import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
 import com.fborowy.mapmyarea.domain.google_auth.GoogleAuthClient
+import com.fborowy.mapmyarea.domain.view_models.AppViewModel
+import com.fborowy.mapmyarea.domain.view_models.LocationPermissionViewModel
+import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
 import com.fborowy.mapmyarea.presentation.components.LocationPermissionDialog
+import com.fborowy.mapmyarea.presentation.screens.CreditsScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignInScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignUpScreen
 import com.fborowy.mapmyarea.presentation.screens.HomeScreen
@@ -228,6 +229,10 @@ fun AppNavigation(
                 mapCreatorViewModel,
                 navController,
             )
+        }
+
+        composable(route = Screen.CreditsScreen.route) {
+            CreditsScreen(onGoBack = { navController.popBackStack(Screen.StartScreen.route, false)})
         }
     }
 }

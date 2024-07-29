@@ -1,4 +1,4 @@
-package com.fborowy.mapmyarea.domain
+package com.fborowy.mapmyarea.domain.states
 
 import com.google.android.gms.maps.model.LatLngBounds
 

@@ -1,6 +1,5 @@
 package com.fborowy.mapmyarea.presentation.screens
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,9 +29,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.domain.MapCreatorViewModel
+import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
+import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
+import com.fborowy.mapmyarea.presentation.components.MapStyle
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -42,8 +45,20 @@ fun MapCreatorScreen2(
     navController: NavController
 ) {
     var isInstructionPopupVisible by remember { mutableStateOf(false) }
+    var isChosePointTypeMenuVisible by remember { mutableStateOf(false) }
 
-    Log.d("MOJE", "${mapCreatorViewModel.getBoundaries()}")
+    if (isChosePointTypeMenuVisible) {
+        AlertDialog(
+            onDismissRequest = { isChosePointTypeMenuVisible = false },
+            confirmButton = { /*TODO*/ },
+            title = { stringResource(id = R.string.chose_new_marker_type_popup_title) },
+//            text = {
+//                Column {
+//                    MarkerType.values.
+//                }
+//            }
+        )
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -104,6 +119,7 @@ fun MapCreatorScreen2(
         GoogleMap(
             properties = MapProperties(
                 isMyLocationEnabled = true, //app must have a localisation permission first in order to enable it
+                mapStyleOptions = MapStyleOptions(MapStyle.mapStyleJson),
                 latLngBoundsForCameraTarget = mapCreatorViewModel.getBoundaries(),
                 minZoomPreference = 16f,
                 maxZoomPreference = 20f
@@ -111,11 +127,15 @@ fun MapCreatorScreen2(
             //onMyLocationButtonClick = { false },
             uiSettings = mapUiSettings,
             onMapClick = {
-
+                         isChosePointTypeMenuVisible = true
             },
         )
 
-
+        if (isInstructionPopupVisible) {
+            MMAInstructionPopup(
+                content = stringResource(id = R.string.set_map_points_instructions),
+                onDismiss = { isInstructionPopupVisible = false })
+        }
     }
 }
 

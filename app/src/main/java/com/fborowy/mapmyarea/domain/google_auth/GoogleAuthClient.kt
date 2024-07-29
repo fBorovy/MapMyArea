@@ -5,7 +5,7 @@ import android.content.Intent
 import android.content.IntentSender
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.data.UserData
-import com.fborowy.mapmyarea.domain.SignInResult
+import com.fborowy.mapmyarea.domain.states.SignInResult
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient

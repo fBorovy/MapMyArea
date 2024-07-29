@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.domain.SignInResult
-import com.fborowy.mapmyarea.domain.ValidateCredentialsViewModel
+import com.fborowy.mapmyarea.domain.states.SignInResult
+import com.fborowy.mapmyarea.domain.view_models.ValidateCredentialsViewModel
 import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
 import com.fborowy.mapmyarea.presentation.components.MMATextField
 import com.fborowy.mapmyarea.ui.theme.ButtonBlack

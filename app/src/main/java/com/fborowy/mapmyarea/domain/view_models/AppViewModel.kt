@@ -1,8 +1,11 @@
-package com.fborowy.mapmyarea.domain
+package com.fborowy.mapmyarea.domain.view_models
 
 import androidx.lifecycle.ViewModel
 import com.fborowy.mapmyarea.data.MapData
 import com.fborowy.mapmyarea.data.UserData
+import com.fborowy.mapmyarea.domain.states.SignInResult
+import com.fborowy.mapmyarea.domain.states.SignInState
+import com.fborowy.mapmyarea.domain.trimEmail
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase

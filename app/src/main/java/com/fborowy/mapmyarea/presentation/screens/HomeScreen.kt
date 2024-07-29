@@ -27,7 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.data.UserData
-import com.fborowy.mapmyarea.domain.AppViewModel
+import com.fborowy.mapmyarea.domain.view_models.AppViewModel
 import com.fborowy.mapmyarea.presentation.components.MMADropDownMenuItem
 import com.fborowy.mapmyarea.ui.theme.DropDownMenuGray
 import com.fborowy.mapmyarea.ui.theme.TextWhite
