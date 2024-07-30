@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -33,7 +34,11 @@ fun MMAInstructionPopup(content: String, onDismiss: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .padding(horizontal = 70.dp)
+                .fillMaxSize()
+                .clickable {
+                    onDismiss()
+                }
+                .padding(horizontal = 70.dp, vertical = 200.dp)
                 .clip(RoundedCornerShape(25.dp))
                 .border(width = 2.dp, shape = RoundedCornerShape(25.dp), color = TextWhite)
                 .background(
@@ -41,9 +46,6 @@ fun MMAInstructionPopup(content: String, onDismiss: () -> Unit) {
                         colors = listOf(Color.Black, InstructionPopupGray),
                     )
                 )
-                .clickable {
-                    onDismiss()
-                }
         ) {
             Text(
                 text = "?",

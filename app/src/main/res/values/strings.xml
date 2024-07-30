@@ -34,7 +34,15 @@
     <string name="set_map_boundaries_instruction">In this step you want to define your map boundaries. In order to do that select two spots on the displayed map corresponding to two corners of the territory you want to include in your map. To reset this setting long click on the map.</string>
     <string name="map_boundaries_not_within_limit">The area you want to select is to big. Try to select smaller area.</string>
     <string name="set_map_points_instructions">In this step you want to set points on your map such as buildings, service points, parkings and other relevant places. In order to do that click on the map where you want to place the point of interest and follow further instructions.</string>
-    <string name="chose_new_marker_type_popup_title">Chose marker type</string>
+    <string name="chose_new_marker_type_popup_title">Chose point type</string>
     <string name="credits">Credits\n</string>
     <string name="flaticon">Flaticon icons:</string>
+    <string name="confirm">Confirm</string>
+    <string name="building_marker_display_name">Building</string>
+    <string name="parking_marker_display_name">Parking</string>
+    <string name="other_marker_display_name">Other</string>
+    <string name="cancel">Cancel</string>
+    <string name="enter_marker_name">Point name</string>
+    <string name="enter_marker_description">Point description</string>
+    <string name="new_marker_popup_title">New point</string>
 </resources>

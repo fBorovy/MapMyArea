@@ -60,6 +60,8 @@ fun CreditsScreen(onGoBack: () -> Unit) {
             style = Typography.labelLarge,
             modifier = Modifier.padding(top = 30.dp, bottom = 10.dp)
         )
-        ClickableLink(link = "https://www.flaticon.com/free-icons/location")
+        ClickableLink(link = "https://www.flaticon.com/free-icons/block", additionalText = "Freepik; ")
+        ClickableLink(link = "https://www.flaticon.com/free-icons/parking", additionalText = "Freepik; ")
+        ClickableLink(link = "https://www.flaticon.com/free-icons/other", additionalText = "Anggara; ")
     }
 }

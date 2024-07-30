@@ -1,11 +1,14 @@
 package com.fborowy.mapmyarea.domain.view_models
 
 import androidx.lifecycle.ViewModel
+import com.fborowy.mapmyarea.domain.MarkerType
 import com.fborowy.mapmyarea.domain.states.NewMapState
+import com.fborowy.mapmyarea.domain.states.NewMarkerState
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -19,7 +22,16 @@ class MapCreatorViewModel: ViewModel() {
     val corner1position: StateFlow<LatLng?> = _corner1position
     private val _corner2position = MutableStateFlow<LatLng?>(null)
     val corner2position: StateFlow<LatLng?> = _corner2position
+    private val _currentlySelectedCoordinates = MutableStateFlow<LatLng?>(null)
+    val currentlySelectedCoordinates: StateFlow<LatLng?> = _currentlySelectedCoordinates
+    private var _newMarkerState = MutableStateFlow(NewMarkerState())
+    //val newMarkerState: StateFlow<NewMarkerState> = _newMarkerState
 
+
+
+    fun setCoordinates(point: LatLng) {
+        _currentlySelectedCoordinates.value = point
+    }
     fun setCorner(latLng: LatLng) {
         if (_corner1position.value == null) {
             _corner1position.value = latLng
@@ -47,6 +59,8 @@ class MapCreatorViewModel: ViewModel() {
                 newMapState.value.bounds = bounds
             }
             else {
+                _corner1position.value = null
+                _corner2position.value = null
                 return 2
             }
         } else {
@@ -88,5 +102,15 @@ class MapCreatorViewModel: ViewModel() {
     fun resetNewMapState() {
         resetCorners()
         newMapState.value.bounds = null
+    }
+
+    fun setMarkerNameDescriptionType(markerName: String, markerDescription: String, selectedMarkerType: MarkerType) {
+        _newMarkerState.update {
+            _newMarkerState.value.copy(
+                markerName = markerName,
+                markerDescription = markerDescription,
+                type = selectedMarkerType
+            )
+        }
     }
 }

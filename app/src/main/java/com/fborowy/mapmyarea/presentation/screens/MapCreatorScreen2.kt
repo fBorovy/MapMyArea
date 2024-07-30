@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
+import com.fborowy.mapmyarea.presentation.components.MMANewMarkerPopup
 import com.fborowy.mapmyarea.presentation.components.MapStyle
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
@@ -46,18 +47,10 @@ fun MapCreatorScreen2(
 ) {
     var isInstructionPopupVisible by remember { mutableStateOf(false) }
     var isChosePointTypeMenuVisible by remember { mutableStateOf(false) }
+    val currentlySelectedCoordinates by mapCreatorViewModel.currentlySelectedCoordinates.collectAsState()
 
     if (isChosePointTypeMenuVisible) {
-        AlertDialog(
-            onDismissRequest = { isChosePointTypeMenuVisible = false },
-            confirmButton = { /*TODO*/ },
-            title = { stringResource(id = R.string.chose_new_marker_type_popup_title) },
-//            text = {
-//                Column {
-//                    MarkerType.values.
-//                }
-//            }
-        )
+        MMANewMarkerPopup(mapCreatorViewModel, onDismiss = { isChosePointTypeMenuVisible = false})
     }
 
     Column(
@@ -127,7 +120,8 @@ fun MapCreatorScreen2(
             //onMyLocationButtonClick = { false },
             uiSettings = mapUiSettings,
             onMapClick = {
-                         isChosePointTypeMenuVisible = true
+                mapCreatorViewModel.setCoordinates(it)
+                isChosePointTypeMenuVisible = true
             },
         )
 

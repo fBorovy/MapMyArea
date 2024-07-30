@@ -59,6 +59,12 @@ fun MapCreatorScreen1(
     val corner1 by mapCreatorViewModel.corner1position.collectAsState()
     val corner2 by mapCreatorViewModel.corner2position.collectAsState()
 
+    if (isInstructionPopupVisible) {
+        MMAInstructionPopup(
+            content = stringResource(id = R.string.set_map_boundaries_instruction),
+            onDismiss = { isInstructionPopupVisible = false })
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -207,11 +213,6 @@ fun MapCreatorScreen1(
         ) {
             Text(text = stringResource(R.string.proceed), style = Typography.bodyMedium)
         }
-    }
-    if (isInstructionPopupVisible) {
-        MMAInstructionPopup(
-            content = stringResource(id = R.string.set_map_boundaries_instruction),
-            onDismiss = { isInstructionPopupVisible = false })
     }
 }
 

@@ -26,11 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
+import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
 import com.fborowy.mapmyarea.domain.states.SignInResult
 import com.fborowy.mapmyarea.domain.view_models.ValidateCredentialsViewModel
-import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
 import com.fborowy.mapmyarea.presentation.components.MMATextField
 import com.fborowy.mapmyarea.ui.theme.ButtonBlack
+import com.fborowy.mapmyarea.ui.theme.TextFieldGray
 import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
 
@@ -80,21 +81,27 @@ fun EmailSignUpScreen(
                 value = validationViewModel.email,
                 onValueChange = { validationViewModel.updateEmailField(it) },
                 placeholder = { Text(context.resources.getString(R.string.enter_email)) },
-                isHidden = false
+                isHidden = false,
+                focusedColor = ButtonBlack,
+                unfocusedColor = TextFieldGray
             )
             Spacer(modifier = Modifier.height(30.dp))
             MMATextField(
                 value = validationViewModel.password1,
                 onValueChange = { validationViewModel.updatePassword1Field(it) },
                 placeholder = { Text(context.resources.getString(R.string.enter_password)) },
-                isHidden = true
+                isHidden = true,
+                focusedColor = ButtonBlack,
+                unfocusedColor = TextFieldGray
             )
             Spacer(modifier = Modifier.height(15.dp))
             MMATextField(
                 value = validationViewModel.password2,
                 onValueChange = { validationViewModel.updatePassword2Field(it) },
                 placeholder = { Text(context.resources.getString(R.string.confirm_password)) },
-                isHidden = true
+                isHidden = true,
+                focusedColor = ButtonBlack,
+                unfocusedColor = TextFieldGray
             )
             Spacer(modifier = Modifier.weight(1f))
             Box(
