@@ -113,7 +113,6 @@ class AppViewModel: ViewModel() {
                                     val floor = Floor(
                                         floorId = floorId,
                                         level = floorLevel,
-                                        description = floorDescription,
                                         rooms = roomsList
                                     )
                                     floorsList.add(floor)

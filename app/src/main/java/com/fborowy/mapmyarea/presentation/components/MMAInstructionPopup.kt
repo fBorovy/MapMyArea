@@ -38,7 +38,7 @@ fun MMAInstructionPopup(content: String, onDismiss: () -> Unit) {
                 .clickable {
                     onDismiss()
                 }
-                .padding(horizontal = 70.dp, vertical = 200.dp)
+                .padding(horizontal = 50.dp, vertical = 150.dp)
                 .clip(RoundedCornerShape(25.dp))
                 .border(width = 2.dp, shape = RoundedCornerShape(25.dp), color = TextWhite)
                 .background(

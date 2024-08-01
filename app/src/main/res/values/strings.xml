@@ -43,6 +43,16 @@
     <string name="other_marker_display_name">Other</string>
     <string name="cancel">Cancel</string>
     <string name="enter_marker_name">Point name</string>
-    <string name="enter_marker_description">Point description</string>
+    <string name="enter_marker_description">Point description (optional)</string>
     <string name="new_marker_popup_title">New point</string>
+    <string name="new_building_popup_title">Building Creator</string>
+    <string name="add_higher_floor">Add above</string>
+    <string name="add_lower_floor">Add below</string>
+    <string name="floor">Floor</string>
+    <string name="building_creator_instruction">In this step you want to define how many floors there are in the created building and what are the levels. To add the lower floor click \"Add below\" button. To add the higher floor click \"Add above\" button. To remove floors click \"Remove first\" and \"Remove last\" buttons. In order to add rooms on the floors, click the floor label. Removing the floor will remove rooms on that floor.</string>
+    <string name="save">Save</string>
+    <string name="one_floor_required">The building must consist of at least one floor.</string>
+    <string name="remove_first_floor">Remove\nfirst</string>
+    <string name="remove_last_floor">Remove\nlast</string>
+    <string name="max_floor_amount_easter_egg">Don\'t kid me. Burj Khalifa is the highest building in the world with 163 floors ;)</string>
 </resources>

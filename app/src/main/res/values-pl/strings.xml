@@ -30,5 +30,5 @@
     <string name="enable">Zezwól</string>
     <string name="proceed">Dalej</string>
     <string name="map_boundaries_not_set">Ustal granice mapy zanim przejdziesz dalej</string>
-    <string name="set_map_boundaries_instruction">W tym kroku określ granice twojej mapy. W tym celu wybierz dwa punkty na wyświetlanej mapie odpowiadające dwóm narożnikom terytorium, które chcesz zawrzeć w swojej mapie. Aby zresetować ustawianie klknij i przytrzymaj w dowolnym miejscu na mapie.</string>
+    <string name="set_map_boundaries_instruction">W tym kroku określ granice twojej mapy. W tym celu wybierz dwa punkty na wyświetlanej mapie odpowiadające dwóm narożnikom terytorium, które chcesz zawrzeć w swojej mapie. Aby zresetować ustawianie kliknij i przytrzymaj w dowolnym miejscu na mapie.</string>
 </resources>

@@ -29,8 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.window.Dialog
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.domain.MarkerType
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
@@ -39,26 +38,23 @@ import com.fborowy.mapmyarea.ui.theme.TextWhite
 import com.fborowy.mapmyarea.ui.theme.Typography
 
 @Composable
-fun MMANewMarkerPopup(mapCreatorViewModel: MapCreatorViewModel, onDismiss: () -> Unit) {
+fun MMANewMarkerPopup(
+    mapCreatorViewModel: MapCreatorViewModel,
+    onDismiss: () -> Unit,
+    onProceed: (Boolean) -> Unit
+) {
 
     var selectedMarkerType by remember { mutableStateOf(MarkerType.Building) }
     var markerName by remember { mutableStateOf("") }
     var markerDescription by remember { mutableStateOf("") }
 
-
-
-    Popup(
-        alignment = Alignment.Center,
+    Dialog(
         onDismissRequest = onDismiss,
-        properties = PopupProperties(
-            dismissOnClickOutside = true,
-            dismissOnBackPress = true
-        )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 40.dp, vertical = 120.dp)
+                .padding(vertical = 120.dp)
                 .clip(RoundedCornerShape(25.dp))
                 .border(width = 2.dp, shape = RoundedCornerShape(25.dp), color = TextWhite)
                 .background(
@@ -82,7 +78,7 @@ fun MMANewMarkerPopup(mapCreatorViewModel: MapCreatorViewModel, onDismiss: () ->
                 MMATextField(
                     value = markerName,
                     onValueChange = { markerName = it },
-                    placeholder = { Text(stringResource(id = R.string.enter_marker_name)) },
+                    placeholder = { Text(text = stringResource(id = R.string.enter_marker_name)) },
                     isHidden = false,
                     focusedColor = TextWhite,
                     unfocusedColor = InstructionPopupGray,
@@ -168,7 +164,7 @@ fun MMANewMarkerPopup(mapCreatorViewModel: MapCreatorViewModel, onDismiss: () ->
                                     markerDescription,
                                     selectedMarkerType
                                 )
-                                onDismiss()
+                                onProceed(true)
                             }
 
                     ) {

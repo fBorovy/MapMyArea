@@ -22,15 +22,15 @@ class MapCreatorViewModel: ViewModel() {
     val corner1position: StateFlow<LatLng?> = _corner1position
     private val _corner2position = MutableStateFlow<LatLng?>(null)
     val corner2position: StateFlow<LatLng?> = _corner2position
-    private val _currentlySelectedCoordinates = MutableStateFlow<LatLng?>(null)
-    val currentlySelectedCoordinates: StateFlow<LatLng?> = _currentlySelectedCoordinates
     private var _newMarkerState = MutableStateFlow(NewMarkerState())
     //val newMarkerState: StateFlow<NewMarkerState> = _newMarkerState
 
 
 
-    fun setCoordinates(point: LatLng) {
-        _currentlySelectedCoordinates.value = point
+    fun setNewMarkerCoordinates(point: LatLng) {
+        _newMarkerState.value = _newMarkerState.value.copy(
+            coordinates = point
+        )
     }
     fun setCorner(latLng: LatLng) {
         if (_corner1position.value == null) {
@@ -112,5 +112,17 @@ class MapCreatorViewModel: ViewModel() {
                 type = selectedMarkerType
             )
         }
+    }
+
+    fun resetNewMarkerState() {
+        _newMarkerState.value = _newMarkerState.value.copy(
+            coordinates = null,
+            markerName = "",
+            markerDescription = "",
+            type = null,
+            localisation = null,
+            photos = "",
+            floors = emptyList(),
+        )
     }
 }

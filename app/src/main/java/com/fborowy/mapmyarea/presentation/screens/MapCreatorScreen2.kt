@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +30,7 @@ import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
+import com.fborowy.mapmyarea.presentation.components.MMANewBuildingPopup
 import com.fborowy.mapmyarea.presentation.components.MMANewMarkerPopup
 import com.fborowy.mapmyarea.presentation.components.MapStyle
 import com.fborowy.mapmyarea.ui.theme.TextWhite
@@ -47,10 +47,31 @@ fun MapCreatorScreen2(
 ) {
     var isInstructionPopupVisible by remember { mutableStateOf(false) }
     var isChosePointTypeMenuVisible by remember { mutableStateOf(false) }
-    val currentlySelectedCoordinates by mapCreatorViewModel.currentlySelectedCoordinates.collectAsState()
+    var isBuildingCreatorVisible by remember { mutableStateOf(false) }
 
     if (isChosePointTypeMenuVisible) {
-        MMANewMarkerPopup(mapCreatorViewModel, onDismiss = { isChosePointTypeMenuVisible = false})
+        MMANewMarkerPopup(
+            mapCreatorViewModel,
+            onDismiss = {
+                isChosePointTypeMenuVisible = false
+                mapCreatorViewModel.resetNewMapState()
+            },
+            onProceed = { isBuilding ->
+                isChosePointTypeMenuVisible = false
+                if (isBuilding) {
+                    isBuildingCreatorVisible = true
+                }
+            }
+        )
+    }
+
+    if (isBuildingCreatorVisible) {
+        MMANewBuildingPopup(
+            onDismiss = {
+                isBuildingCreatorVisible = false
+                mapCreatorViewModel.resetNewMapState()
+            }
+        )
     }
 
     Column(
@@ -120,7 +141,7 @@ fun MapCreatorScreen2(
             //onMyLocationButtonClick = { false },
             uiSettings = mapUiSettings,
             onMapClick = {
-                mapCreatorViewModel.setCoordinates(it)
+                mapCreatorViewModel.setNewMarkerCoordinates(it)
                 isChosePointTypeMenuVisible = true
             },
         )

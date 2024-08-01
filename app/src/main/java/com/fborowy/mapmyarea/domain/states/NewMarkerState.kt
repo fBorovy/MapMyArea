@@ -5,10 +5,11 @@ import com.fborowy.mapmyarea.domain.MarkerType
 import com.google.android.gms.maps.model.LatLng
 
 data class NewMarkerState(
+    val coordinates: LatLng? = null,
     val markerName: String? = "",
     val markerDescription: String?= "",
     val type: MarkerType? = null,
     val localisation: LatLng? = null,
     val photos: String? = "",
-    val floors: List<Floor>? = null,
+    val floors: List<Floor>? = emptyList(),
 )
