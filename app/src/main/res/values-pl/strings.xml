@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="login_with_google">Zaloguj kontem Google</string>
-    <string name="login_with_email">Zaloguj używając adresu email</string>
+    <string name="login_with_google">Zaloguj z Google</string>
     <string name="register">Zarejestruj</string>
     <string name="profile_menu">Menu użytkownika</string>
     <string name="user_maps">Zapisane mapy</string>
@@ -30,5 +29,5 @@
     <string name="enable">Zezwól</string>
     <string name="proceed">Dalej</string>
     <string name="map_boundaries_not_set">Ustal granice mapy zanim przejdziesz dalej</string>
-    <string name="set_map_boundaries_instruction">W tym kroku określ granice twojej mapy. W tym celu wybierz dwa punkty na wyświetlanej mapie odpowiadające dwóm narożnikom terytorium, które chcesz zawrzeć w swojej mapie. Aby zresetować ustawianie kliknij i przytrzymaj w dowolnym miejscu na mapie.</string>
+    <string name="set_map_boundaries_instruction">Wybierz dwa punty na mapie (narożniki) aby wyznaczyć jej granice.\nPrzytrzymaj aby zresetować.</string>
 </resources>

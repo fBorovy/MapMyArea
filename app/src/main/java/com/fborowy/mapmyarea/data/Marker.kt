@@ -4,7 +4,7 @@ import com.fborowy.mapmyarea.domain.MarkerType
 import com.google.android.gms.maps.model.LatLng
 
 data class Marker(
-    val markerId: String,
+    val markerId: String? = null,
     val markerName: String?,
     val markerDescription: String?,
     val type: MarkerType,

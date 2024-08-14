@@ -1,7 +1,7 @@
 package com.fborowy.mapmyarea.data
 
 data class Floor(
-    val floorId: String,
-    val level: Int?,
-    val rooms: List<Room>,
+    val floorId: String? = null,
+    val level: Int,
+    val rooms: List<Room> = emptyList()
 )

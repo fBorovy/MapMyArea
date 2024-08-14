@@ -60,31 +60,38 @@ class EmailAuthClient(
             }
     }
 
-    fun signInWithEmail(email: String, password: String, onComplete: (SignInResult) -> Unit){
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                val result = if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    SignInResult(
-                        data = user?.run {
-                            UserData(
-                                userId = uid,
-                                username = trimEmail(email),
-                                savedMaps = emptyList()
-                            )
-                        },
-                        errorMessage = null
-                    )
-                } else {
-                    val e = task.exception
-                    e?.printStackTrace()
-                    if (e is CancellationException) throw e
-                    SignInResult(
-                        data = null,
-                        errorMessage = e.toString()
-                    )
+    fun signInWithEmail(email: String?, password: String?, onComplete: (SignInResult) -> Unit){
+        if (email == null || password == null ) {
+            val e = Exception()
+            e.printStackTrace()
+            throw e
+        }
+        else {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    val result = if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        SignInResult(
+                            data = user?.run {
+                                UserData(
+                                    userId = uid,
+                                    username = trimEmail(email),
+                                    savedMaps = emptyList()
+                                )
+                            },
+                            errorMessage = null
+                        )
+                    } else {
+                        val e = task.exception
+                        e?.printStackTrace()
+                        if (e is CancellationException) throw e
+                        SignInResult(
+                            data = null,
+                            errorMessage = e.toString()
+                        )
+                    }
+                    onComplete(result)
                 }
-                onComplete(result)
-            }
+        }
     }
 }

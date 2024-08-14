@@ -7,9 +7,8 @@ import com.google.android.gms.maps.model.LatLng
 data class NewMarkerState(
     val coordinates: LatLng? = null,
     val markerName: String? = "",
-    val markerDescription: String?= "",
+    val markerDescription: String? = "",
     val type: MarkerType? = null,
-    val localisation: LatLng? = null,
     val photos: String? = "",
-    val floors: List<Floor>? = emptyList(),
+    val floors: List<Floor> = listOf(Floor(level = 0, rooms = emptyList())),
 )

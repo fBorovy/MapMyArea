@@ -60,18 +60,17 @@ class AppViewModel: ViewModel() {
 
                 if (mapDocument.exists()) {
                     val mapId = mapDocument.id
-                    val mapName = mapDocument.getString("mapName")
-                    val northLimit = mapDocument.getString("northLimit")
-                    val westLimit = mapDocument.getString("westLimit")
-                    val southLimit = mapDocument.getString("southLimit")
-                    val eastLimit = mapDocument.getString("eastLimit")
+                    val mapName = mapDocument.getString("name")
+                    val mapDescription = mapDocument.getString("description")
+                    val northEastBound = mapDocument.getGeoPoint("northEastBound")
+                    val southWestBound = mapDocument.getGeoPoint("southWestBound")
                     val markersSnapshot = mapDocument.reference.collection("markers")
                         .get().await()
                     val markersList = mutableListOf<Marker>()
 
                     for (markerDocument in markersSnapshot) {
                         val markerId = markerDocument.id
-                        val markerName = markerDocument.getString("mapName")
+                        val markerName = markerDocument.getString("name")
                         val markerDescription = markerDocument.getString("description")
                         val markerCoordinates = markerDocument.getGeoPoint("coordinates")
                         val mType = markerDocument.getLong("type")!!.toInt()
@@ -89,7 +88,7 @@ class AppViewModel: ViewModel() {
                             for (floorDocument in floorsSnapshot) {
                                 if (floorDocument.exists()) {
                                     val floorId = floorDocument.id
-                                    val floorLevel = floorDocument.getLong("level")?.toInt()
+                                    val floorLevel = floorDocument.getLong("level")!!.toInt()
                                     val floorDescription = floorDocument.getString("description")
                                     val roomsSnapshot = floorDocument.reference.collection("rooms")
                                         .get().await()
@@ -103,8 +102,8 @@ class AppViewModel: ViewModel() {
 
                                             val room = Room(
                                                 roomId = roomId,
-                                                name = roomName,
-                                                description = roomDescription
+                                                name = roomName!!,
+                                                description = roomDescription!!
                                             )
                                             roomsList.add(room)
                                         }
@@ -132,10 +131,9 @@ class AppViewModel: ViewModel() {
                         val map = MapData(
                             mapId = mapId,
                             mapName = mapName,
-                            northLimit = northLimit,
-                            westLimit = westLimit,
-                            southLimit = southLimit,
-                            eastLimit = eastLimit,
+                            mapDescription = mapDescription,
+                            northEastBound = northEastBound,
+                            southWestBound = southWestBound,
                             markers = markersList
                         )
                         savedMaps.add(map)

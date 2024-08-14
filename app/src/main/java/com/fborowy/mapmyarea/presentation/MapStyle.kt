@@ -1,4 +1,4 @@
-package com.fborowy.mapmyarea.presentation.components
+package com.fborowy.mapmyarea.presentation
 
 object MapStyle {
 
@@ -19,10 +19,10 @@ object MapStyle {
                 "elementType": "labels",
                 "stylers": [
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     },
                     {
-                        "saturation": "-100"
+                        "saturation": "36"
                     }
                 ]
             },
@@ -40,7 +40,7 @@ object MapStyle {
                         "lightness": 40
                     },
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     }
                 ]
             },
@@ -49,7 +49,7 @@ object MapStyle {
                 "elementType": "labels.text.stroke",
                 "stylers": [
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     },
                     {
                         "color": "#000000"
@@ -64,7 +64,7 @@ object MapStyle {
                 "elementType": "labels.icon",
                 "stylers": [
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     }
                 ]
             },
@@ -158,6 +158,15 @@ object MapStyle {
                 "stylers": [
                     {
                         "color": "#4d6059"
+                    }
+                ]
+            },
+            {
+                "featureType": "poi",
+                "elementType": "all",
+                "stylers": [
+                    {
+                        "visibility": "off"
                     }
                 ]
             },
@@ -328,7 +337,7 @@ object MapStyle {
                 "elementType": "labels",
                 "stylers": [
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     }
                 ]
             },
@@ -337,7 +346,7 @@ object MapStyle {
                 "elementType": "labels.text",
                 "stylers": [
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     }
                 ]
             },
@@ -346,7 +355,7 @@ object MapStyle {
                 "elementType": "labels.text.fill",
                 "stylers": [
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     }
                 ]
             },
@@ -355,7 +364,7 @@ object MapStyle {
                 "elementType": "labels.text.stroke",
                 "stylers": [
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     }
                 ]
             },
@@ -364,7 +373,7 @@ object MapStyle {
                 "elementType": "labels.icon",
                 "stylers": [
                     {
-                        "visibility": "off"
+                        "visibility": "on"
                     }
                 ]
             }

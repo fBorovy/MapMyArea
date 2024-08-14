@@ -27,9 +27,12 @@ import com.fborowy.mapmyarea.presentation.components.LocationPermissionDialog
 import com.fborowy.mapmyarea.presentation.screens.CreditsScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignInScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignUpScreen
+import com.fborowy.mapmyarea.presentation.screens.FloorConfigurationScreen
 import com.fborowy.mapmyarea.presentation.screens.HomeScreen
 import com.fborowy.mapmyarea.presentation.screens.MapCreatorScreen1
 import com.fborowy.mapmyarea.presentation.screens.MapCreatorScreen2
+import com.fborowy.mapmyarea.presentation.screens.MapCreatorScreen3
+import com.fborowy.mapmyarea.presentation.screens.MarkerConfigurationScreen
 import com.fborowy.mapmyarea.presentation.screens.StartScreen
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
@@ -214,9 +217,11 @@ fun AppNavigation(
                 }
             }
 
-            EmailSignInScreen(navController = navController, emailAuthClient, onSignInClick = {
-                viewModel.onSignIn(it)
-            })
+            EmailSignInScreen(
+                navController = navController,
+                emailAuthClient = emailAuthClient,
+                onSignInClick = { viewModel.onSignIn(it) }
+            )
         }
         composable(route = Screen.MapCreatorScreen1.route) {
             MapCreatorScreen1(
@@ -230,9 +235,31 @@ fun AppNavigation(
                 navController,
             )
         }
+        composable(route = Screen.MapCreatorScreen3.route) {
+            MapCreatorScreen3(
+                mapCreatorViewModel,
+                navController,
+            )
+        }
 
         composable(route = Screen.CreditsScreen.route) {
-            CreditsScreen(onGoBack = { navController.popBackStack(Screen.StartScreen.route, false)})
+            CreditsScreen(onGoBack = { navController.popBackStack(
+                Screen.StartScreen.route,
+                false
+            )})
+        }
+
+        composable(route = Screen.MarkerConfigurationScreen.route) {
+            MarkerConfigurationScreen(
+                mapCreatorViewModel = mapCreatorViewModel,
+                navController = navController
+            )
+        }
+        composable(route = Screen.FloorConfigurationScreen.route) {
+            FloorConfigurationScreen(
+                navController = navController,
+                mapCreatorViewModel = mapCreatorViewModel
+            )
         }
     }
 }
