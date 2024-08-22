@@ -1,6 +1,7 @@
 package com.fborowy.mapmyarea.presentation.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,13 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.data.Room
+import com.fborowy.mapmyarea.data.classes.RoomData
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
@@ -47,6 +49,7 @@ fun FloorConfigurationScreen(
     mapCreatorViewModel: MapCreatorViewModel,
 ) {
 
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val floor by mapCreatorViewModel.newFloorState.collectAsState()
     val rooms = floor.rooms
@@ -99,9 +102,17 @@ fun FloorConfigurationScreen(
         MMAButton(
             text = stringResource(id = R.string.add_room),
             onClick = {
-                mapCreatorViewModel.addRoomToFloor(Room(name = roomName, description = roomDescription))
-                roomName = ""
-                roomDescription = ""
+                if (roomName.length > 2) {
+                    mapCreatorViewModel.addRoomToFloor(RoomData(name = roomName, description = roomDescription))
+                    roomName = ""
+                    roomDescription = ""
+                } else {
+                    Toast.makeText(
+                        context,
+                        context.resources.getString(R.string.room_name_too_short),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         )
         Spacer(modifier = Modifier.height(20.dp))

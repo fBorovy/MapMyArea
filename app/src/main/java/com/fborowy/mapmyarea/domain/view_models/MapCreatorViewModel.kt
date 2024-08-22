@@ -1,30 +1,35 @@
 package com.fborowy.mapmyarea.domain.view_models
 
 import androidx.lifecycle.ViewModel
-import com.fborowy.mapmyarea.data.Floor
-import com.fborowy.mapmyarea.data.MapData
-import com.fborowy.mapmyarea.data.MapRepository
-import com.fborowy.mapmyarea.data.Marker
-import com.fborowy.mapmyarea.data.Room
+import androidx.lifecycle.viewModelScope
+import com.fborowy.mapmyarea.R
+import com.fborowy.mapmyarea.data.classes.FloorData
+import com.fborowy.mapmyarea.data.classes.MapData
+import com.fborowy.mapmyarea.data.classes.MarkerData
+import com.fborowy.mapmyarea.data.Repository
 import com.fborowy.mapmyarea.domain.MarkerType
 import com.fborowy.mapmyarea.domain.states.NewFloorState
 import com.fborowy.mapmyarea.domain.states.NewMapState
 import com.fborowy.mapmyarea.domain.states.NewMarkerState
+import com.fborowy.mapmyarea.domain.states.SavingMapState
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+const val MIN_MAP_NAME_LENGTH = 3
+val FORBIDDEN_MAP_NAME_CHARACTERS = listOf('/', '*', '[', ']', '{', '}', '#', '%', '?')
 @Suppress("SameParameterValue")
 class MapCreatorViewModel: ViewModel() {
 
-    private val mapRepository: MapRepository = MapRepository()
+    private val repository: Repository = Repository()
 
     private var _newMapState = MutableStateFlow(NewMapState())
     val newMapState: StateFlow<NewMapState> = _newMapState
@@ -36,13 +41,16 @@ class MapCreatorViewModel: ViewModel() {
     val newMarkerState: StateFlow<NewMarkerState> = _newMarkerState
     private var _newFloorState = MutableStateFlow(NewFloorState())
     val newFloorState: StateFlow<NewFloorState> = _newFloorState
+    private var _savingMapState = MutableStateFlow(SavingMapState())
+    val savingMapState: StateFlow<SavingMapState> = _savingMapState
+    var errorMessage: Int = 0
     var isInstructionScreen1Visible = true
     var isInstructionScreen2Visible = true
 
     fun addFloor(onTop: Boolean) {
         if (onTop) {
             _newMarkerState.update { it.copy(
-                floors = it.floors + Floor(
+                floors = it.floors + FloorData(
                     level = it.floors.last().level + 1,
                     rooms = emptyList()
                 )
@@ -50,10 +58,12 @@ class MapCreatorViewModel: ViewModel() {
         }
         else {
             _newMarkerState.update { it.copy(
-                floors = listOf(Floor(
+                floors = listOf(
+                    FloorData(
                     level = it.floors.first().level - 1,
                     rooms = emptyList()
-                )) + it.floors
+                )
+                ) + it.floors
             )}
         }
     }
@@ -76,7 +86,7 @@ class MapCreatorViewModel: ViewModel() {
             ) }
         }
     }
-    fun addRoomToFloor(room: Room) {
+    fun addRoomToFloor(room: RoomData) {
         _newMarkerState.update { currentState ->
             val updatedFloors = currentState.floors.map { floor ->
                 if (floor.level == _newFloorState.value.level) {
@@ -92,7 +102,7 @@ class MapCreatorViewModel: ViewModel() {
             currentState.copy(floors = updatedFloors)
         }
     }
-    fun removeRoomFromFloor(room: Room) {
+    fun removeRoomFromFloor(room: RoomData) {
         _newMarkerState.update { currentState ->
             val updatedFloors = currentState.floors.map {floor ->
                 if (floor.level == _newFloorState.value.level) {
@@ -118,16 +128,29 @@ class MapCreatorViewModel: ViewModel() {
             }
         }
     }
+
     fun saveNewMap() {
-        mapRepository.addNewMap(
-            MapData(
-                mapName = _newMapState.value.name,
-                mapDescription = _newMapState.value.description,
-                northEastBound = GeoPoint(_newMapState.value.bounds!!.northeast.latitude, _newMapState.value.bounds!!.northeast.longitude),
-                southWestBound = GeoPoint(_newMapState.value.bounds!!.southwest.latitude, _newMapState.value.bounds!!.southwest.longitude),
-                markers = _newMapState.value.markers
-            )
-        )
+        viewModelScope.launch {
+            try {
+                _savingMapState.value = repository.addNewMap(
+                    MapData(
+                        mapName = _newMapState.value.name,
+                        mapDescription = _newMapState.value.description,
+                        northEastBound = GeoPoint(
+                            _newMapState.value.bounds!!.northeast.latitude,
+                            _newMapState.value.bounds!!.northeast.longitude
+                        ),
+                        southWestBound = GeoPoint(
+                            _newMapState.value.bounds!!.southwest.latitude,
+                            _newMapState.value.bounds!!.southwest.longitude
+                        ),
+                        markers = _newMapState.value.markers
+                    )
+                )
+            } catch (e: Exception) {
+                throw e
+            }
+        }
     }
 
     fun setNewMapName(name: String) {
@@ -196,6 +219,7 @@ class MapCreatorViewModel: ViewModel() {
     }
 
     //funkcja korzystająca ze wzoru Haversine'a do obliczenia odległości między dwoma punktami na kuli ziemskiej
+    //function using Haversine formula to define distance between two points on earth
     private fun calculateDistance(c1Lat: Double, c1Lon: Double, c2Lat: Double, c2Lon: Double): Double {
         val earthRadius = 6371.0
 
@@ -236,13 +260,16 @@ class MapCreatorViewModel: ViewModel() {
 
     fun addNewMarkerToMap() {
         _newMapState.update {it.copy(
-                markers = it.markers.plus(Marker(
+                markers = it.markers.plus(
+                    MarkerData(
                     localisation = _newMarkerState.value.coordinates!!,
                     markerName = _newMarkerState.value.markerName,
                     markerDescription = _newMarkerState.value.markerDescription,
                     photos = "",
-                    type = _newMarkerState.value.type!!
-                ))
+                    type = _newMarkerState.value.type!!,
+                    floors = _newMarkerState.value.floors
+                )
+                )
             )
         }
         resetNewMarkerState()
@@ -258,7 +285,34 @@ class MapCreatorViewModel: ViewModel() {
             markerName = "",
             markerDescription = "",
             photos = "",
-            floors = listOf(Floor(level = 0, rooms = emptyList())),
+            floors = listOf(FloorData(level = 0, rooms = emptyList())),
         )
+    }
+
+    fun resetSavingMapState() {
+        _savingMapState.update { it.copy(
+            saveMapSuccessful = false,
+            saveMapError = null
+        )}
+    }
+
+    fun checkFirestoreNameValidity(): Boolean {
+        if (_newMapState.value.name.length < MIN_MAP_NAME_LENGTH) {
+            errorMessage = R.string.map_name_shorter_than_3_error_message
+            return false
+        }
+        if (FORBIDDEN_MAP_NAME_CHARACTERS.any { _newMapState.value.name.contains(it) }) {
+            errorMessage = R.string.map_name_invalid_characters_error_message
+            return false
+        }
+        if (_newMapState.value.name.startsWith(".") || _newMapState.value.name.endsWith(".")) {
+            errorMessage = R.string.map_name_dot_error_message
+            return false
+        }
+        if (_newMapState.value.name.contains("..")) {
+            errorMessage = R.string.double_dot_map_name_error_message
+            return false
+        }
+        return true
     }
 }

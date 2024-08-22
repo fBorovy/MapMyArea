@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.googleSecrets)
+    alias(libs.plugins.hilt)
+    id("kotlin-kapt")
 }
 
 android {
@@ -79,6 +81,10 @@ dependencies {
     //Navigation
     implementation(libs.androidx.navigation)
     implementation(libs.androidx.lifecycle)
+
+    //Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
     //Google Maps
     implementation(libs.google.maps.compose)

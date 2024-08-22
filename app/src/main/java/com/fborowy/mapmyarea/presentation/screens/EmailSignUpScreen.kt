@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
+import com.fborowy.mapmyarea.data.EmailAuthClient
 import com.fborowy.mapmyarea.domain.states.SignInResult
-import com.fborowy.mapmyarea.domain.view_models.ValidateCredentialsViewModel
+import com.fborowy.mapmyarea.domain.view_models.RegistrationViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
 import com.fborowy.mapmyarea.presentation.components.MMAHeader
@@ -38,8 +38,10 @@ fun EmailSignUpScreen(
     onSignUpClick: (SignInResult) -> Unit,
 ) {
     val context = LocalContext.current
-    val validationViewModel = viewModel<ValidateCredentialsViewModel>()
+    val registrationViewModel = viewModel<RegistrationViewModel>()
     val keyboardController = LocalSoftwareKeyboardController.current
+    val maxUsernameLength = 50
+    val maxPasswordLength = 30
 
     Column(
         modifier = Modifier
@@ -66,22 +68,38 @@ fun EmailSignUpScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 MMATextField(
-                    value = validationViewModel.email,
-                    onValueChange = { validationViewModel.updateEmailField(it) },
+                    value = registrationViewModel.email,
+                    onValueChange = {
+                        if (it.length <= maxUsernameLength) {
+                            registrationViewModel.updateEmailField(it)
+                        } else {
+                            registrationViewModel.updateEmailField(it.take(maxUsernameLength))
+                        }
+                                    },
                     placeholder = { Text( text = stringResource(R.string.enter_email)) },
                     isHidden = false,
                 )
                 Spacer(modifier = Modifier.height(30.dp))
                 MMATextField(
-                    value = validationViewModel.password1,
-                    onValueChange = { validationViewModel.updatePassword1Field(it) },
+                    value = registrationViewModel.password1,
+                    onValueChange = {
+                        if (it.length <= maxPasswordLength) {
+                            registrationViewModel.updatePassword1Field(it)
+                        } else {
+                            registrationViewModel.updatePassword1Field(it.take(maxPasswordLength))
+                        }},
                     placeholder = { Text(text = stringResource(R.string.enter_password)) },
                     isHidden = true,
                 )
                 Spacer(modifier = Modifier.height(15.dp))
                 MMATextField(
-                    value = validationViewModel.password2,
-                    onValueChange = { validationViewModel.updatePassword2Field(it) },
+                    value = registrationViewModel.password2,
+                    onValueChange = {
+                        if (it.length <= maxPasswordLength) {
+                            registrationViewModel.updatePassword2Field(it)
+                        } else {
+                            registrationViewModel.updatePassword2Field(it.take(maxPasswordLength))
+                        }},
                     placeholder = { Text( text = stringResource(R.string.confirm_password)) },
                     isHidden = true,
                 )
@@ -89,26 +107,31 @@ fun EmailSignUpScreen(
                 MMAButton(
                     text = stringResource(R.string.register),
                     onClick = {
-                        val result = validationViewModel.validate()
+                        val result = registrationViewModel.validate()
                         if (result != 0) showRegisteringErrorMessage(context, error = result)
                         else {
                             try {
-                                emailAuthClient.signUpWithEmail(
-                                    validationViewModel.email,
-                                    validationViewModel.password2,
-                                ) {
-                                    onSignUpClick(it)
+                                registrationViewModel.signUp(emailAuthClient){
+                                    if (it.data == null) {
+                                        Toast.makeText(
+                                            context,
+                                            it.errorMessage,
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    } else {
+                                        onSignUpClick(it)
+                                    }
                                 }
                             } catch (e: Exception) {
                                 Toast
                                     .makeText(
                                         context,
-                                        context.resources.getString(R.string.failed_to_sign_in),
+                                        if (e.message == "exists") context.resources.getString(R.string.user_already_exists)
+                                        else context.resources.getString(R.string.failed_to_sign_in),
                                         Toast.LENGTH_LONG
                                     )
                                     .show()
                             }
-
                         }
                     }
                 )

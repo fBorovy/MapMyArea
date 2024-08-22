@@ -1,19 +1,26 @@
-package com.fborowy.mapmyarea.domain.email_auth
+package com.fborowy.mapmyarea.data
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.fborowy.mapmyarea.data.UserData
+import com.fborowy.mapmyarea.data.classes.UserData
 import com.fborowy.mapmyarea.domain.states.SignInResult
 import com.fborowy.mapmyarea.domain.trimEmail
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
 
 class EmailAuthClient(
     private val auth: FirebaseAuth,
     private val database: FirebaseFirestore
 ): ViewModel() {
-    fun signUpWithEmail(email: String, password: String, onComplete: (SignInResult) -> Unit) {
+    suspend fun signUpWithEmail(email: String, password: String, onComplete: (SignInResult) -> Unit) {
+        val docRef = database.collection("users").document(email)
+        val userDocument = docRef.get().await()
+        if (userDocument.exists()) {
+            throw Exception("exists")
+        }
+
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 val result = if (task.isSuccessful) {
@@ -22,18 +29,17 @@ class EmailAuthClient(
                         "username" to trimEmail(user?.email!!),
                         "savedMaps" to null,
                     )
+
                     Log.d("FIRE", user.uid)
                     database.collection("users")
-                        .document(user.uid)
+                        .document(email)
                         .set(newFirestoreUser)
-                        .addOnSuccessListener { Log.d("AAAA", "DocumentSnapshot successfully written!") }
-                        .addOnFailureListener { e -> Log.w("AAAA", "Error writing document", e) }
 
                     SignInResult(
                         data = user.run {
                             UserData(
-                                userId = uid,
-                                username = trimEmail(email),
+                                userId = user.email,
+                                username = uid,
                                 savedMaps = emptyList()
                             )
                         },
@@ -55,7 +61,7 @@ class EmailAuthClient(
                     SignInResult(
                     null,
                     errorMessage = exception.message
-                )
+                    )
                 )
             }
     }
@@ -74,7 +80,7 @@ class EmailAuthClient(
                         SignInResult(
                             data = user?.run {
                                 UserData(
-                                    userId = uid,
+                                    userId = user.email,
                                     username = trimEmail(email),
                                     savedMaps = emptyList()
                                 )

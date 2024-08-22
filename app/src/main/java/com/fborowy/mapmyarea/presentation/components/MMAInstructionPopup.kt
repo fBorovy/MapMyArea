@@ -3,9 +3,12 @@ package com.fborowy.mapmyarea.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +28,13 @@ import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.ui.theme.Typography
 
 @Composable
-fun MMAInstructionPopup(content: String, onDismiss: () -> Unit) {
+fun MMAInstructionPopup(
+    content: String,
+    onDismiss: () -> Unit,
+    onDismissLabel: String = stringResource(id = R.string.ok),
+    onConfirm: (() -> Unit)? = null,
+    onConfirmLabel: String = stringResource(id = R.string.confirm)
+) {
     Popup(
         alignment = Alignment.Center,
         properties = PopupProperties(
@@ -37,9 +46,13 @@ fun MMAInstructionPopup(content: String, onDismiss: () -> Unit) {
         Column(
             modifier = Modifier
                 .padding(50.dp)
-                .shadow(elevation = 7.dp)
+                .shadow(elevation = 7.dp, shape = RoundedCornerShape(25.dp))
                 .clip(RoundedCornerShape(25.dp))
-                .border(width = 2.dp, shape = RoundedCornerShape(25.dp), color = MaterialTheme.colorScheme.onTertiary)
+                .border(
+                    width = 2.dp,
+                    shape = RoundedCornerShape(25.dp),
+                    color = MaterialTheme.colorScheme.onTertiary
+                )
                 .background(MaterialTheme.colorScheme.background)
                 .padding(30.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -57,7 +70,14 @@ fun MMAInstructionPopup(content: String, onDismiss: () -> Unit) {
                 modifier = Modifier
                     .padding(top = 15.dp, bottom = 24.dp)
             )
-            MMAButton(text = stringResource(id = R.string.ok), onClick = { onDismiss() })
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                MMAButton(text = onDismissLabel, onClick = { onDismiss() })
+                if (onConfirm != null)
+                    MMAButton(text = onConfirmLabel, onClick = { onConfirm() })
+            }
         }
     }
     Box(

@@ -25,7 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
+import com.fborowy.mapmyarea.data.EmailAuthClient
 import com.fborowy.mapmyarea.domain.states.SignInResult
 import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
@@ -42,6 +42,8 @@ fun EmailSignInScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val maxUsernameLength = 50
+    val maxPasswordLength = 30
 
     Column(
         modifier = Modifier
@@ -68,14 +70,24 @@ fun EmailSignInScreen(
             ) {
                 MMATextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        if (it.length <= maxUsernameLength) {
+                            email = it
+                        } else {
+                            email = it.take(maxUsernameLength)
+                        }},
                     placeholder = { Text(text = stringResource(R.string.enter_email)) },
                     isHidden = false,
                 )
                 Spacer(modifier = Modifier.height(15.dp))
                 MMATextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        if (it.length <= maxPasswordLength) {
+                            password = it
+                        } else {
+                            password = it.take(maxPasswordLength)
+                        }},
                     placeholder = { Text(text = stringResource(R.string.enter_password)) },
                     isHidden = true,
                 )

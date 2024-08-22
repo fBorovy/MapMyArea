@@ -1,6 +1,10 @@
 package com.fborowy.mapmyarea.presentation.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,26 +12,34 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.data.UserData
+import com.fborowy.mapmyarea.data.classes.MapData
 import com.fborowy.mapmyarea.domain.view_models.AppViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
+import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
+import com.fborowy.mapmyarea.presentation.components.MMATextField
 import com.fborowy.mapmyarea.ui.theme.Typography
 
 @Composable
@@ -35,16 +47,41 @@ fun HomeScreen(
     appViewModel: AppViewModel,
     onSignOut: () -> Unit,
     onCreateMap: () -> Unit,
+    onOpenMap: (MapData) -> Unit,
 ) {
     val context = LocalContext.current
-    var userData by remember { mutableStateOf<UserData?>(null) }
-    LaunchedEffect(key1 = Unit){
-        userData = appViewModel.getSignedUserInfo()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val savedMaps = mutableListOf<MapData>()
+    val ownedMaps = mutableListOf<MapData>()
+    val searchText by appViewModel.searchText.collectAsState()
+    val addingMapState by appViewModel.addingMapState.collectAsState()
+    val userData by appViewModel.userData.collectAsState()
+    val collectingUserDataError by appViewModel.collectingUserInfoError.collectAsState()
+    var showSearchBarInstruction by rememberSaveable { mutableStateOf(false) }
+    var showSavedMapRemovalConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+    var showOwnMapDeletionConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+    var mapToDeleteName by rememberSaveable { mutableStateOf("") }
+    val mapDeletionIssue by appViewModel.mapDeletionIssue.collectAsState()
+
+    if (userData.userId == null || collectingUserDataError != "") {
+        Toast.makeText(
+            context, collectingUserDataError, Toast.LENGTH_LONG
+        ).show()
+        onSignOut()
+    }
+    for (map in userData.savedMaps!!) {
+        if (userData.userId == map.owner) ownedMaps.add(map)
+        else savedMaps.add(map)
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    keyboardController?.hide() // Ukrywa klawiaturę
+                })
+            }
             .background(MaterialTheme.colorScheme.background)
             .padding(25.dp)
             .verticalScroll(rememberScrollState()),
@@ -56,13 +93,13 @@ fun HomeScreen(
         ) {
             Text(
                 modifier = Modifier.weight(1f),
-                text = userData?.username ?: context.getString(R.string.user),
+                text = userData.username ?: context.getString(R.string.user),
                 style = Typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
         Spacer(modifier = Modifier.height(25.dp))
-        Row() {
+        Row {
             MMAButton(
                 text = context.getString(R.string.create_map),
                 onClick = onCreateMap
@@ -73,14 +110,165 @@ fun HomeScreen(
                 onClick = onSignOut
             )
         }
+        if (ownedMaps.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(25.dp))
+            MMAContentBox {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = context.getString(R.string.own_maps),
+                        style = Typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    for (map in ownedMaps) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${map.mapName}",
+                                modifier = Modifier.clickable {
+                                    onOpenMap(map)
+                                }
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                painter = painterResource(id = R.drawable.delete_24),
+                                contentDescription = stringResource(id = R.string.delete_description),
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .padding(top = 4.dp)
+                                    .clickable {
+                                        keyboardController?.hide()
+                                        mapToDeleteName = map.mapName!!
+                                    }
+                            )
+                        }
+                    }
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(25.dp))
         MMAContentBox {
-            Text(
-                text = context.getString(R.string.user_maps),
-                style = Typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimary,
-            )
-            Spacer(modifier = Modifier.height(25.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                MMATextField(
+                    value = searchText,
+                    onValueChange = { appViewModel.updateSearchMapText(it) },
+                    placeholder = { Text(text = stringResource(id = R.string.search_map)) },
+                    isHidden = false
+                )
+                Spacer(modifier = Modifier.height(7.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    MMAButton(
+                        text = "?",
+                        onClick = {
+                            showSearchBarInstruction = true
+                        }
+                    )
+                    MMAButton(
+                        text = stringResource(id = R.string.add_map),
+                        onClick = {
+                            appViewModel.addMapToUserSavedMaps()
+                        }
+                    )
+                }
+            }
         }
+        Spacer(modifier = Modifier.height(25.dp))
+        MMAContentBox {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = context.getString(R.string.user_maps),
+                    style = Typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                for (map in savedMaps) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "${map.mapName}",
+                            modifier = Modifier.clickable {
+                                onOpenMap(map)
+                            }
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            painter = painterResource(id = R.drawable.delete_24),
+                            contentDescription = stringResource(id = R.string.delete_description),
+                            modifier = Modifier
+                                .size(30.dp)
+                                .padding(top = 4.dp)
+                                .clickable {
+                                    keyboardController?.hide()
+                                    mapToDeleteName = map.mapName!!
+                                    showSavedMapRemovalConfirmationDialog = true
+                                }
+                        )
+                    }
+                }
+            }
+        }
+    }
+    if (addingMapState.addingSuccessful) {
+        keyboardController?.hide()
+        appViewModel.clearSearchText()
+        appViewModel.resetAddingMapState()
+    }
+    if (addingMapState.errorCode != null) {
+        MMAInstructionPopup(
+            content = stringResource(id = addingMapState.errorCode as Int),
+            onDismiss = { appViewModel.resetAddingMapState() }
+        )
+    }
+    if (showSearchBarInstruction) {
+        MMAInstructionPopup(
+            content = stringResource(id = R.string.search_map_instruction),
+            onDismiss = { showSearchBarInstruction = false }
+        )
+    }
+    if (showSavedMapRemovalConfirmationDialog) {
+        MMAInstructionPopup(
+            content = stringResource(id = R.string.assure_saved_map_removal),
+            onDismiss = { showSavedMapRemovalConfirmationDialog = false },
+            onDismissLabel = stringResource(id = R.string.cancel),
+            onConfirm = {
+                appViewModel.removeMapFromUserSaved(mapToDeleteName)
+                mapToDeleteName = ""
+            },
+            onConfirmLabel = stringResource(id = R.string.confirm)
+        )
+    }
+    if (showOwnMapDeletionConfirmationDialog) {
+        MMAInstructionPopup(
+            content = stringResource(id = R.string.assure_own_map_deletion),
+            onDismiss = { showOwnMapDeletionConfirmationDialog = false },
+            onDismissLabel = stringResource(id = R.string.cancel),
+            onConfirm = {
+                appViewModel.deleteMap(mapToDeleteName)
+                mapToDeleteName = ""
+            }
+        )
+    }
+    if (mapDeletionIssue) {
+        MMAInstructionPopup(
+            content = stringResource(id = R.string.map_not_deleted),
+            onDismiss = { appViewModel.resetMapDeletionStatus() }
+        )
     }
 }

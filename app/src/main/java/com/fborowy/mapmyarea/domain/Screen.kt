@@ -10,7 +10,7 @@ sealed class Screen(val route: String = "") {
     data object MapCreatorScreen3: Screen(route = "map_creator_screen3")
     data object MarkerConfigurationScreen: Screen(route = "marker_configuration_screen")
     data object FloorConfigurationScreen: Screen(route = "floor_configuration_screen")
-    data object SavedMapScreen: Screen(route = "saved_map_screen")
+    data object MapScreen: Screen(route = "map_screen")
     data object CreditsScreen: Screen(route = "credits_screen")
 
 }

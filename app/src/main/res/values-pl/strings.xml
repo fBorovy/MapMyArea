@@ -14,7 +14,7 @@
     <string name="toast_sign_in">Zalogowano pomyślnie</string>
     <string name="toast_sign_out">Wylogowano pomyślnie</string>
     <string name="enter_username">Nazwa użytkownika</string>
-    <string name="short_password_error">Hasło musi składać się z conajmniej 10 znaków.</string>
+    <string name="short_password_error">Hasło musi składać się z conajmniej 6 znaków</string>
     <string name="passwords_differ_error">Hasła muszą być takie same</string>
     <string name="check_email_error">Rejestracja nie możliwa, sprawdź poprawność adresu email</string>
     <string name="empty_email_error">Wprowadź adres e-mail</string>

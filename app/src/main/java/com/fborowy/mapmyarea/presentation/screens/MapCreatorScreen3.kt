@@ -1,5 +1,6 @@
 package com.fborowy.mapmyarea.presentation.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -13,9 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -39,9 +37,11 @@ fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: N
 
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    var isSavedMapPopupVisible by remember { mutableStateOf(false) }
     val mapName by mapCreatorViewModel.newMapState.map { it.name }.collectAsState(initial = "")
     val mapDescription by mapCreatorViewModel.newMapState.map { it.description }.collectAsState(initial = "")
+    val savingMapState by mapCreatorViewModel.savingMapState.collectAsState()
+    val maxMapNameLength = 40
+    val maxMapDescriptionLength = 150
 
     Column(
         modifier = Modifier
@@ -66,14 +66,25 @@ fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: N
             ) {
                 MMATextField(
                     value = mapName,
-                    onValueChange = { mapCreatorViewModel.setNewMapName(it) },
+                    onValueChange = {
+                        if (it.length <= maxMapNameLength) {
+                            mapCreatorViewModel.setNewMapName(it)
+                        } else {
+                            mapCreatorViewModel.setNewMapName(it.take(maxMapNameLength))
+                        }
+                               },
                     placeholder = { Text(text = stringResource(id = R.string.map_name)) },
                     isHidden = false,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 MMATextField(
                     value = mapDescription,
-                    onValueChange = { mapCreatorViewModel.setNewMapDescription(it) },
+                    onValueChange = {
+                        if (mapDescription.length <= maxMapDescriptionLength) {
+                            mapCreatorViewModel.setNewMapDescription(it)
+                        } else {
+                            mapCreatorViewModel.setNewMapDescription(it.take(maxMapDescriptionLength))
+                        }},
                     placeholder = { Text(text = stringResource(id = R.string.map_description)) },
                     isHidden = false,
                 )
@@ -83,20 +94,42 @@ fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: N
         MMAButton(
             text = stringResource(id = R.string.save),
             onClick = {
-                try {
-                    mapCreatorViewModel.saveNewMap()
-                    mapCreatorViewModel.resetNewMapState()
-                } catch (e: Exception) {
-                    Toast.makeText(context, "NIE MA MAPY", Toast.LENGTH_LONG).show()
+                if (mapCreatorViewModel.checkFirestoreNameValidity()) {
+                    try {
+                        mapCreatorViewModel.saveNewMap()
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            context,
+                            e.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } else {
+                    Toast.makeText(
+                        context,
+                        context.resources.getString(mapCreatorViewModel.errorMessage),
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                isSavedMapPopupVisible = true
             }
         )
     }
-    if (isSavedMapPopupVisible) {
+    if (savingMapState.saveMapSuccessful) {
         MMAInstructionPopup(
             content = stringResource(id = R.string.map_saved_popup),
-            onDismiss = { navController.popBackStack(route = Screen.HomeScreen.route, inclusive = false) },
+            onDismiss = {
+                mapCreatorViewModel.resetSavingMapState()
+                mapCreatorViewModel.resetNewMapState()
+                navController.popBackStack(route = Screen.HomeScreen.route, inclusive = false) },
         )
+    }
+    if (savingMapState.saveMapError != null) {
+        Toast.makeText(
+            context,
+            if (savingMapState.saveMapError == "exists") context.resources.getString(R.string.map_with_entered_name_already_exists)
+                else savingMapState.saveMapError,
+            Toast.LENGTH_LONG
+        ).show()
+        Log.d("ERROR", "${savingMapState.saveMapError}")
     }
 }

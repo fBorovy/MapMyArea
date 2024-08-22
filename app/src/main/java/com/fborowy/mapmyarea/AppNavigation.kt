@@ -13,16 +13,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fborowy.mapmyarea.domain.Screen
-import com.fborowy.mapmyarea.domain.email_auth.EmailAuthClient
-import com.fborowy.mapmyarea.domain.google_auth.GoogleAuthClient
+import com.fborowy.mapmyarea.data.EmailAuthClient
+import com.fborowy.mapmyarea.data.GoogleAuthClient
 import com.fborowy.mapmyarea.domain.view_models.AppViewModel
 import com.fborowy.mapmyarea.domain.view_models.LocationPermissionViewModel
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
+import com.fborowy.mapmyarea.domain.view_models.MapViewModel
 import com.fborowy.mapmyarea.presentation.components.LocationPermissionDialog
 import com.fborowy.mapmyarea.presentation.screens.CreditsScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignInScreen
@@ -32,9 +34,11 @@ import com.fborowy.mapmyarea.presentation.screens.HomeScreen
 import com.fborowy.mapmyarea.presentation.screens.MapCreatorScreen1
 import com.fborowy.mapmyarea.presentation.screens.MapCreatorScreen2
 import com.fborowy.mapmyarea.presentation.screens.MapCreatorScreen3
+import com.fborowy.mapmyarea.presentation.screens.MapScreen
 import com.fborowy.mapmyarea.presentation.screens.MarkerConfigurationScreen
 import com.fborowy.mapmyarea.presentation.screens.StartScreen
 import com.google.android.gms.auth.api.identity.Identity
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,26 +46,27 @@ fun AppNavigation(
     applicationContext: Context,
     lifecycleScope: LifecycleCoroutineScope,
     activity: Activity,
+    appViewModel: AppViewModel = viewModel(),
 ) {
-    val viewModel = viewModel<AppViewModel>()
+
     val mapCreatorViewModel = viewModel<MapCreatorViewModel>()
-    val signInState by viewModel.signInState.collectAsStateWithLifecycle()
-    val emailAuthClient = EmailAuthClient(viewModel.auth, viewModel.database)
+    val signInState by appViewModel.signInState.collectAsStateWithLifecycle()
+    val emailAuthClient = EmailAuthClient(appViewModel.auth, viewModel.database)
     val googleAuthUiClient by lazy {
         GoogleAuthClient(
             context = applicationContext,
             oneTapClient = Identity.getSignInClient(applicationContext),
-            viewModel.auth
+            appViewModel.auth
         )
     }
     val navController = rememberNavController()
-
+    val mapViewModel = MapViewModel()
 
 
     NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
         composable(Screen.StartScreen.route) {
             LaunchedEffect(key1 = Unit) {
-                if (viewModel.auth.currentUser != null)
+                if (appViewModel.checkIfLogged())
                     navController.navigate(Screen.HomeScreen.route)
             }
             val launcher = rememberLauncherForActivityResult(
@@ -72,7 +77,7 @@ fun AppNavigation(
                             val signInResult = googleAuthUiClient.signInWithIntent(
                                 intent = result.data ?: return@launch
                             )
-                            viewModel.onSignIn(signInResult)
+                            appViewModel.onSignIn(signInResult)
                         }
                     }
                 }
@@ -80,8 +85,8 @@ fun AppNavigation(
 
             LaunchedEffect(key1 = signInState.signInSuccessful){
                 if (signInState.signInSuccessful){
-                    val user = viewModel.auth.currentUser
-                    viewModel.database.collection("users")
+                    val user = appViewModel.auth.currentUser
+                    appViewModel.database.collection("users")
                         .document(user!!.uid)
                         .get()
                         .addOnCompleteListener { task ->
@@ -93,7 +98,7 @@ fun AppNavigation(
                                         "savedMaps" to null,
                                     )
                                     viewModel.database.collection("users")
-                                        .document(user.uid)
+                                        .document(user.email!!)
                                         .set(newFirestoreUser)
                                 }
                             }
@@ -156,6 +161,11 @@ fun AppNavigation(
                     }
                 )
             }
+            LaunchedEffect(key1 = Unit) {
+                viewModel.viewModelScope.launch {
+                    viewModel.getSignedUserInfo()
+                }
+            }
 
             HomeScreen(
                 appViewModel = viewModel,
@@ -179,6 +189,23 @@ fun AppNavigation(
                         navController.popBackStack(Screen.StartScreen.route, false)
                     }
                 },
+                onOpenMap = {
+                    viewModel.switchDisplayedMap(it)
+                    locationPermissionViewModel.checkAndRequestPermissions(
+                        context = applicationContext,
+                        navController = navController,
+                        screen = Screen.MapScreen.route,
+                        permissions = locationPermissionViewModel.locationPermissions,
+                        launcher = locationPermissionsLauncher
+                    )
+                },
+            )
+        }
+        composable(route = Screen.MapScreen.route) {
+            MapScreen(
+                mapViewModel,
+                viewModel.getDisplayedMapInfo(),
+                navController
             )
         }
 
@@ -187,7 +214,7 @@ fun AppNavigation(
                 if (signInState.signInSuccessful) {
                     Toast.makeText(
                         applicationContext,
-                        applicationContext.resources.getString(R.string.toast_sign_in),
+                        applicationContext.resources.getString(R.string.toast_sign_up),
                         Toast.LENGTH_LONG
                     ).show()
                     navController.navigate(Screen.HomeScreen.route)

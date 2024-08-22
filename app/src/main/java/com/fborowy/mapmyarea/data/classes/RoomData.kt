@@ -1,6 +1,6 @@
-package com.fborowy.mapmyarea.data
+package com.fborowy.mapmyarea.data.classes
 
-data class Room(
+data class RoomData(
     val roomId: String? = null,
     val name: String = "",
     val description: String = "",

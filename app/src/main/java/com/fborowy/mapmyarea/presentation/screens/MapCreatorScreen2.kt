@@ -61,14 +61,14 @@ fun MapCreatorScreen2(
     val context = LocalContext.current
     var isNewPointButtonVisible by remember { mutableStateOf(false) }
     var newMarkerPosition by remember { mutableStateOf<LatLng?>(null) }
-    val markerAddBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-            BitmapFactory.decodeResource(context.resources, R.drawable.marker_add), 100, 100, true))
-    val markerParkingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-            BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 100, 100, true))
-    val markerBuildingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-            BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 100, 100, true))
-    val markerOtherBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-        BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 100, 100, true))
+    val markerAddBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+            BitmapFactory.decodeResource(context.resources, R.drawable.marker_add), 100, 100, true))}
+    val markerParkingBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+            BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 100, 100, true))}
+    val markerBuildingBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+            BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 100, 100, true))}
+    val markerOtherBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+        BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 100, 100, true))}
     var isInstructionVisible by rememberSaveable { mutableStateOf(true) }
 
 
@@ -121,8 +121,8 @@ fun MapCreatorScreen2(
                     isMyLocationEnabled = true, //app must have a localisation permission first in order to enable it
                     mapStyleOptions = MapStyleOptions(MapStyle.mapStyleJson),
                     latLngBoundsForCameraTarget = mapCreatorViewModel.getBoundaries(),
-                    minZoomPreference = 16f,
-                    maxZoomPreference = 20f,
+                    minZoomPreference = 17f,
+                    maxZoomPreference = 19f,
                 ),
                 //onMyLocationButtonClick = { false },
                 uiSettings = mapUiSettings,
@@ -147,8 +147,8 @@ fun MapCreatorScreen2(
                     Marker(
                         state = MarkerState(position = marker.localisation),
                         icon = when (marker.type) {
-                            MarkerType.Building -> markerBuildingBitmap
-                            MarkerType.Parking -> markerParkingBitmap
+                            MarkerType.BUILDING -> markerBuildingBitmap
+                            MarkerType.PARKING -> markerParkingBitmap
                             else -> markerOtherBitmap
                         },
                         title = marker.markerName
@@ -163,20 +163,20 @@ fun MapCreatorScreen2(
             ) {
                 if (isNewPointButtonVisible) {
                     MMAButton(text = stringResource(id = R.string.new_building_button_text), onClick = {
-                        mapCreatorViewModel.setMarkerType(MarkerType.Building)
+                        mapCreatorViewModel.setMarkerType(MarkerType.BUILDING)
                         navController.navigate(Screen.MarkerConfigurationScreen.route) },
                         backgroundColor = onMapButtonBackground,
                         textColor = onMapButtonText
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     MMAButton(text = stringResource(id = R.string.new_parking_button_text), onClick = {
-                        mapCreatorViewModel.setMarkerType(MarkerType.Parking)
+                        mapCreatorViewModel.setMarkerType(MarkerType.PARKING)
                         navController.navigate(Screen.MarkerConfigurationScreen.route) },
                         backgroundColor = onMapButtonBackground,
                         textColor = onMapButtonText)
                     Spacer(modifier = Modifier.height(10.dp))
                     MMAButton(text = stringResource(id = R.string.new_other_button_text), onClick = {
-                        mapCreatorViewModel.setMarkerType(MarkerType.Other)
+                        mapCreatorViewModel.setMarkerType(MarkerType.OTHER)
                         navController.navigate(Screen.MarkerConfigurationScreen.route) },
                         backgroundColor = onMapButtonBackground,
                         textColor = onMapButtonText

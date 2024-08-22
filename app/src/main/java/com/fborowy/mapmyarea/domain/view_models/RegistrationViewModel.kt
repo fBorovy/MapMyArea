@@ -4,8 +4,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.fborowy.mapmyarea.data.EmailAuthClient
+import com.fborowy.mapmyarea.domain.states.SignInResult
+import kotlinx.coroutines.launch
 
-class ValidateCredentialsViewModel: ViewModel() {
+class RegistrationViewModel: ViewModel() {
 
     var password1 by mutableStateOf("")
         private set
@@ -35,5 +39,20 @@ class ValidateCredentialsViewModel: ViewModel() {
 
     fun updatePassword2Field(newPass2: String) {
         password2 = newPass2
+    }
+
+    fun signUp(emailAuthClient: EmailAuthClient, onSignUpClick: (SignInResult) -> Unit){
+        viewModelScope.launch {
+            try {
+                emailAuthClient.signUpWithEmail(
+                    email,
+                    password2,
+                ) {
+                    onSignUpClick(it)
+                }
+            } catch (e: Exception) {
+                throw e
+            }
+        }
     }
 }

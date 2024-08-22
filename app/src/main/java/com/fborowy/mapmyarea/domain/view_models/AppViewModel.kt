@@ -1,32 +1,41 @@
 package com.fborowy.mapmyarea.domain.view_models
 
 import androidx.lifecycle.ViewModel
-import com.fborowy.mapmyarea.data.Floor
-import com.fborowy.mapmyarea.data.MapData
-import com.fborowy.mapmyarea.data.Marker
-import com.fborowy.mapmyarea.data.Room
-import com.fborowy.mapmyarea.data.UserData
-import com.fborowy.mapmyarea.domain.MarkerType
+import androidx.lifecycle.viewModelScope
+import com.fborowy.mapmyarea.R
+import com.fborowy.mapmyarea.data.Repository
+import com.fborowy.mapmyarea.data.classes.MapData
+import com.fborowy.mapmyarea.data.classes.UserData
+import com.fborowy.mapmyarea.domain.states.AddingMapState
 import com.fborowy.mapmyarea.domain.states.SignInResult
 import com.fborowy.mapmyarea.domain.states.SignInState
-import com.fborowy.mapmyarea.domain.trimEmail
-import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AppViewModel: ViewModel() {
+@HiltViewModel
+class AppViewModel @Inject constructor(
+    private val repository: Repository,
+): ViewModel() {
 
-    val auth = Firebase.auth
     private val _signInState = MutableStateFlow(SignInState())
-    private val signedWithGoogle = false
     val signInState = _signInState.asStateFlow()
-    val database = Firebase.firestore
+    private var _userData = MutableStateFlow(UserData(userId = null, username = null, savedMaps = emptyList()))
+    val userData: StateFlow<UserData> = _userData
+    private val _searchText = MutableStateFlow("")
+    val searchText: StateFlow<String> = _searchText
+    private var displayedMap = MapData(null, null, "", null, null, null)
+    private val maxMapNameLength = 50
+    private val _addingMapState = MutableStateFlow(AddingMapState())
+    val addingMapState: StateFlow<AddingMapState> = _addingMapState
+    private val _mapDeletionIssue = MutableStateFlow(true)
+    val mapDeletionIssue: StateFlow<Boolean> = _mapDeletionIssue
+    private var _collectingUserInfoError = MutableStateFlow("")
+    val collectingUserInfoError: StateFlow<String?> = _collectingUserInfoError
 
     fun onSignIn(result: SignInResult) {
         _signInState.update { it.copy(
@@ -38,129 +47,94 @@ class AppViewModel: ViewModel() {
         _signInState.update { SignInState() }
     }
 
-//    suspend fun getSignedUserInfo(): UserData {
-//        return if (signedWithGoogle) getSignedGoogleUserInfo()
-//        else getSignedEmailUserInfo()
-//    }
+    fun getSignedUserInfo() {
+        try {
+            viewModelScope.launch {
+                _userData.update {
+                    repository.getSignedUserInfo()?:UserData()
+                }
+            }
+        } catch (e: Exception) {
+            _collectingUserInfoError.value = e.message?: ""
+        }
+    }
 
-    suspend fun getSignedUserInfo(): UserData {
-        val savedMaps = mutableListOf<MapData>()
-        val userDocumentReference = database.collection("users")
-            .document(auth.currentUser!!.uid)
+    fun switchDisplayedMap(map: MapData) {
+        displayedMap = map
+    }
+    fun getDisplayedMapInfo(): MapData {
+        return displayedMap
+    }
 
-        val userSavedMapsSnapshot = userDocumentReference.collection("savedMaps")
-            .get()
-            .await()
+    fun updateSearchMapText(text: String) {
+        if (text.length < maxMapNameLength)
+            _searchText.update { text }
+        else _searchText.update { text.take(maxMapNameLength) }
+    }
 
-        for (savedMapDocumentReference in userSavedMapsSnapshot) {
-            val mapReference = savedMapDocumentReference.getDocumentReference("mapRef")
-
-            if (mapReference != null) {
-                val mapDocument = mapReference.get().await()
-
-                if (mapDocument.exists()) {
-                    val mapId = mapDocument.id
-                    val mapName = mapDocument.getString("name")
-                    val mapDescription = mapDocument.getString("description")
-                    val northEastBound = mapDocument.getGeoPoint("northEastBound")
-                    val southWestBound = mapDocument.getGeoPoint("southWestBound")
-                    val markersSnapshot = mapDocument.reference.collection("markers")
-                        .get().await()
-                    val markersList = mutableListOf<Marker>()
-
-                    for (markerDocument in markersSnapshot) {
-                        val markerId = markerDocument.id
-                        val markerName = markerDocument.getString("name")
-                        val markerDescription = markerDocument.getString("description")
-                        val markerCoordinates = markerDocument.getGeoPoint("coordinates")
-                        val mType = markerDocument.getLong("type")!!.toInt()
-                        val markerType = when (mType) {
-                            0 -> MarkerType.Building
-                            1 -> MarkerType.Parking
-                            else -> MarkerType.Other
-                        }
-
-                        if (markerType == MarkerType.Building) {
-                            val floorsSnapshot = markerDocument.reference.collection("floors")
-                                .get().await()
-                            val floorsList = mutableListOf<Floor>()
-
-                            for (floorDocument in floorsSnapshot) {
-                                if (floorDocument.exists()) {
-                                    val floorId = floorDocument.id
-                                    val floorLevel = floorDocument.getLong("level")!!.toInt()
-                                    val floorDescription = floorDocument.getString("description")
-                                    val roomsSnapshot = floorDocument.reference.collection("rooms")
-                                        .get().await()
-                                    val roomsList = mutableListOf<Room>()
-
-                                    for (roomDocument in roomsSnapshot) {
-                                        if (roomDocument.exists()) {
-                                            val roomId = roomDocument.id
-                                            val roomName = roomDocument.getString("name")
-                                            val roomDescription = roomDocument.getString("description")
-
-                                            val room = Room(
-                                                roomId = roomId,
-                                                name = roomName!!,
-                                                description = roomDescription!!
-                                            )
-                                            roomsList.add(room)
-                                        }
-                                    }
-
-                                    val floor = Floor(
-                                        floorId = floorId,
-                                        level = floorLevel,
-                                        rooms = roomsList
-                                    )
-                                    floorsList.add(floor)
-                                }
-                            }
-                            val marker = Marker(
-                                markerId = markerId,
-                                markerName = markerName,
-                                markerDescription = markerDescription,
-                                type = markerType,
-                                localisation = geoPointToLatLng(markerCoordinates!!),
-                                photos = null,
-                                floors = floorsList
-                            )
-                            markersList.add(marker)
-                        }
-                        val map = MapData(
-                            mapId = mapId,
-                            mapName = mapName,
-                            mapDescription = mapDescription,
-                            northEastBound = northEastBound,
-                            southWestBound = southWestBound,
-                            markers = markersList
-                        )
-                        savedMaps.add(map)
-                    }
+    fun addMapToUserSavedMaps() {
+        if (
+            _searchText.value.length < MIN_MAP_NAME_LENGTH ||
+            FORBIDDEN_MAP_NAME_CHARACTERS.any { _searchText.value.contains(it) } ||
+            _searchText.value.startsWith(".") || _searchText.value.endsWith(".") ||
+            _searchText.value.contains("..")
+        ) {
+            _addingMapState.update {
+                AddingMapState(false, R.string.map_not_found)
+            }
+            return
+        }
+        for (map in _userData.value.savedMaps!!) {
+            if (map.mapName == _searchText.value) {
+                _addingMapState.update {
+                    AddingMapState(false, R.string.you_have_added_this_map_already)
+                }
+                return
+            }
+        }
+        viewModelScope.launch {
+            val addingMapState = repository.saveMapForUser(searchText.value)
+            if (addingMapState.addingSuccessful) {
+                _userData.update { it.copy(
+                    savedMaps = it.savedMaps!!.plus(addingMapState.addedMap!!)
+                ) }
+            } else {
+                _addingMapState.update {
+                    AddingMapState(false, addingMapState.errorCode)
                 }
             }
         }
-        return UserData(
-            userId = auth.currentUser?.uid,
-            username = trimEmail(auth.currentUser!!.email!!),
-            savedMaps = savedMaps
-        )
-    }
-//    private suspend fun getSignedEmailUserInfo(): UserData {
-//        val savedMaps = mutableListOf<MapData>()
-//
-//        val userDocumentSnapshot = database.collection("users")
-//
-//        return UserData(
-//            userId = auth.currentUser!!.uid,
-//            username = trimEmail(auth.currentUser!!.email!!),
-//            savedMaps = savedMaps
-//        )
-//    }
-
-    private fun geoPointToLatLng(geoPoint: GeoPoint): LatLng {
-        return LatLng(geoPoint.latitude, geoPoint.longitude)
     }
 
+
+    fun resetAddingMapState() {
+        _addingMapState.update {
+            AddingMapState(false, null)
+        }
+    }
+    fun clearSearchText() {
+        _searchText.update { "" }
+    }
+
+    fun deleteMap(mapName: String) {
+        repository.deleteOwnMap(mapName)
+    }
+
+    fun removeMapFromUserSaved(mapName: String) {
+        viewModelScope.launch {
+            try {
+                repository.removeMapFromUserMaps(mapName)
+            } catch (e: Exception) {
+                _mapDeletionIssue.update { true }
+            }
+        }
+    }
+
+    fun resetMapDeletionStatus() {
+        _mapDeletionIssue.update { false }
+    }
+
+    fun checkIfLogged(): Boolean {
+        return repository.checkIfLogged()
+    }
 }

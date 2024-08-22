@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.data.Floor
+import com.fborowy.mapmyarea.data.classes.FloorData
 import com.fborowy.mapmyarea.domain.MarkerType
 import com.fborowy.mapmyarea.domain.Screen
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
@@ -58,7 +58,9 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
 
     val maxFloorAmount = 163
     val minFloorAmount = 1
-    val floorsList by mapCreatorViewModel.newMarkerState.map { it.floors }.collectAsState(initial = listOf(Floor(level = 0, rooms = emptyList())))
+    val floorsList by mapCreatorViewModel.newMarkerState.map { it.floors }.collectAsState(initial = listOf(
+        FloorData(level = 0, rooms = emptyList())
+    ))
     val areRemoveFloorButtonsActive by remember { derivedStateOf{floorsList.size > minFloorAmount } }
     val areAddFloorButtonsActive by remember { derivedStateOf { floorsList.size <= maxFloorAmount } }
     val coroutineScope = rememberCoroutineScope()
@@ -79,7 +81,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
-                    keyboardController?.hide() // Ukrywa klawiaturę
+                    keyboardController?.hide()
                 })
             }
             .background(MaterialTheme.colorScheme.background)
@@ -118,7 +120,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        if (mapCreatorViewModel.getMarkerType() == MarkerType.Building) {
+        if (mapCreatorViewModel.getMarkerType() == MarkerType.BUILDING) {
             MMAContentBox {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -243,10 +245,18 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
         MMAButton(
             text = stringResource(id = R.string.save),
             onClick = {
-                mapCreatorViewModel.setMarkerNameDescription(markerName, markerDescription)
-                mapCreatorViewModel.addNewMarkerToMap()
-                mapCreatorViewModel.resetNewMarkerState()
-                navController.popBackStack()
+                if (markerName.length > 2) {
+                    mapCreatorViewModel.setMarkerNameDescription(markerName, markerDescription)
+                    mapCreatorViewModel.addNewMarkerToMap()
+                    mapCreatorViewModel.resetNewMarkerState()
+                    navController.popBackStack()
+                } else {
+                    Toast.makeText(
+                        context,
+                        context.resources.getString(R.string.marker_name_shorter_than_3),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         )
         Spacer(modifier = Modifier.height(20.dp))
