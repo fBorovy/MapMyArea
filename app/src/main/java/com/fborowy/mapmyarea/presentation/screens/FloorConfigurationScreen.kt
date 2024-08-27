@@ -33,7 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.data.Room
+import com.fborowy.mapmyarea.data.classes.RoomData
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
@@ -99,7 +99,7 @@ fun FloorConfigurationScreen(
         MMAButton(
             text = stringResource(id = R.string.add_room),
             onClick = {
-                mapCreatorViewModel.addRoomToFloor(Room(name = roomName, description = roomDescription))
+                mapCreatorViewModel.addRoomToFloor(RoomData(name = roomName, description = roomDescription))
                 roomName = ""
                 roomDescription = ""
             }

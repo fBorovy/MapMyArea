@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.data.Floor
+import com.fborowy.mapmyarea.data.classes.FloorData
 import com.fborowy.mapmyarea.domain.MarkerType
 import com.fborowy.mapmyarea.domain.Screen
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
@@ -58,7 +58,9 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
 
     val maxFloorAmount = 163
     val minFloorAmount = 1
-    val floorsList by mapCreatorViewModel.newMarkerState.map { it.floors }.collectAsState(initial = listOf(Floor(level = 0, rooms = emptyList())))
+    val floorsList by mapCreatorViewModel.newMarkerState.map { it.floors }.collectAsState(initial = listOf(
+        FloorData(level = 0, rooms = emptyList())
+    ))
     val areRemoveFloorButtonsActive by remember { derivedStateOf{floorsList.size > minFloorAmount } }
     val areAddFloorButtonsActive by remember { derivedStateOf { floorsList.size <= maxFloorAmount } }
     val coroutineScope = rememberCoroutineScope()

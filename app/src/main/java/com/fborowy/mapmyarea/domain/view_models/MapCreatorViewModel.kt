@@ -1,11 +1,11 @@
 package com.fborowy.mapmyarea.domain.view_models
 
 import androidx.lifecycle.ViewModel
-import com.fborowy.mapmyarea.data.Floor
-import com.fborowy.mapmyarea.data.MapData
 import com.fborowy.mapmyarea.data.MapRepository
-import com.fborowy.mapmyarea.data.Marker
-import com.fborowy.mapmyarea.data.Room
+import com.fborowy.mapmyarea.data.classes.FloorData
+import com.fborowy.mapmyarea.data.classes.MapData
+import com.fborowy.mapmyarea.data.classes.MarkerData
+import com.fborowy.mapmyarea.data.classes.RoomData
 import com.fborowy.mapmyarea.domain.MarkerType
 import com.fborowy.mapmyarea.domain.states.NewFloorState
 import com.fborowy.mapmyarea.domain.states.NewMapState
@@ -42,7 +42,7 @@ class MapCreatorViewModel: ViewModel() {
     fun addFloor(onTop: Boolean) {
         if (onTop) {
             _newMarkerState.update { it.copy(
-                floors = it.floors + Floor(
+                floors = it.floors + FloorData(
                     level = it.floors.last().level + 1,
                     rooms = emptyList()
                 )
@@ -50,10 +50,12 @@ class MapCreatorViewModel: ViewModel() {
         }
         else {
             _newMarkerState.update { it.copy(
-                floors = listOf(Floor(
-                    level = it.floors.first().level - 1,
-                    rooms = emptyList()
-                )) + it.floors
+                floors = listOf(
+                    FloorData(
+                        level = it.floors.first().level - 1,
+                        rooms = emptyList()
+                )
+                ) + it.floors
             )}
         }
     }
@@ -76,7 +78,7 @@ class MapCreatorViewModel: ViewModel() {
             ) }
         }
     }
-    fun addRoomToFloor(room: Room) {
+    fun addRoomToFloor(room: RoomData) {
         _newMarkerState.update { currentState ->
             val updatedFloors = currentState.floors.map { floor ->
                 if (floor.level == _newFloorState.value.level) {
@@ -92,7 +94,7 @@ class MapCreatorViewModel: ViewModel() {
             currentState.copy(floors = updatedFloors)
         }
     }
-    fun removeRoomFromFloor(room: Room) {
+    fun removeRoomFromFloor(room: RoomData) {
         _newMarkerState.update { currentState ->
             val updatedFloors = currentState.floors.map {floor ->
                 if (floor.level == _newFloorState.value.level) {
@@ -123,8 +125,14 @@ class MapCreatorViewModel: ViewModel() {
             MapData(
                 mapName = _newMapState.value.name,
                 mapDescription = _newMapState.value.description,
-                northEastBound = GeoPoint(_newMapState.value.bounds!!.northeast.latitude, _newMapState.value.bounds!!.northeast.longitude),
-                southWestBound = GeoPoint(_newMapState.value.bounds!!.southwest.latitude, _newMapState.value.bounds!!.southwest.longitude),
+                northEastBound = GeoPoint(
+                    _newMapState.value.bounds!!.northeast.latitude,
+                    _newMapState.value.bounds!!.northeast.longitude
+                ),
+                southWestBound = GeoPoint(
+                    _newMapState.value.bounds!!.southwest.latitude,
+                    _newMapState.value.bounds!!.southwest.longitude
+                ),
                 markers = _newMapState.value.markers
             )
         )
@@ -236,13 +244,15 @@ class MapCreatorViewModel: ViewModel() {
 
     fun addNewMarkerToMap() {
         _newMapState.update {it.copy(
-                markers = it.markers.plus(Marker(
+                markers = it.markers.plus(
+                    MarkerData(
                     localisation = _newMarkerState.value.coordinates!!,
                     markerName = _newMarkerState.value.markerName,
                     markerDescription = _newMarkerState.value.markerDescription,
                     photos = "",
                     type = _newMarkerState.value.type!!
-                ))
+                )
+                )
             )
         }
         resetNewMarkerState()
@@ -258,7 +268,7 @@ class MapCreatorViewModel: ViewModel() {
             markerName = "",
             markerDescription = "",
             photos = "",
-            floors = listOf(Floor(level = 0, rooms = emptyList())),
+            floors = listOf(FloorData(level = 0, rooms = emptyList())),
         )
     }
 }

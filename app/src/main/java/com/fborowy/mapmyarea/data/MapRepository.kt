@@ -2,6 +2,7 @@ package com.fborowy.mapmyarea.data
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import com.fborowy.mapmyarea.data.classes.MapData
 import com.fborowy.mapmyarea.domain.MarkerType
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore

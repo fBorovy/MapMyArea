@@ -42,6 +42,8 @@ fun EmailSignInScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val maxUsernameLength = 50
+    val maxPasswordLength = 30
 
     Column(
         modifier = Modifier
@@ -68,14 +70,26 @@ fun EmailSignInScreen(
             ) {
                 MMATextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = if (it.length <= maxUsernameLength) {
+                            it
+                        } else {
+                            it.take(maxUsernameLength)
+                        }
+                    },
                     placeholder = { Text(text = stringResource(R.string.enter_email)) },
                     isHidden = false,
                 )
                 Spacer(modifier = Modifier.height(15.dp))
                 MMATextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        password = if (it.length <= maxPasswordLength) {
+                            it
+                        } else {
+                            it.take(maxPasswordLength)
+                        }
+                    },
                     placeholder = { Text(text = stringResource(R.string.enter_password)) },
                     isHidden = true,
                 )

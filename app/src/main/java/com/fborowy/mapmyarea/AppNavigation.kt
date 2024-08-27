@@ -24,7 +24,6 @@ import com.fborowy.mapmyarea.domain.view_models.AppViewModel
 import com.fborowy.mapmyarea.domain.view_models.LocationPermissionViewModel
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
 import com.fborowy.mapmyarea.presentation.components.LocationPermissionDialog
-import com.fborowy.mapmyarea.presentation.screens.CreditsScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignInScreen
 import com.fborowy.mapmyarea.presentation.screens.EmailSignUpScreen
 import com.fborowy.mapmyarea.presentation.screens.FloorConfigurationScreen
@@ -82,7 +81,7 @@ fun AppNavigation(
                 if (signInState.signInSuccessful){
                     val user = viewModel.auth.currentUser
                     viewModel.database.collection("users")
-                        .document(user!!.uid)
+                        .document(user!!.email!!)
                         .get()
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
@@ -93,7 +92,7 @@ fun AppNavigation(
                                         "savedMaps" to null,
                                     )
                                     viewModel.database.collection("users")
-                                        .document(user.uid)
+                                        .document(user.email!!)
                                         .set(newFirestoreUser)
                                 }
                             }
@@ -240,13 +239,6 @@ fun AppNavigation(
                 mapCreatorViewModel,
                 navController,
             )
-        }
-
-        composable(route = Screen.CreditsScreen.route) {
-            CreditsScreen(onGoBack = { navController.popBackStack(
-                Screen.StartScreen.route,
-                false
-            )})
         }
 
         composable(route = Screen.MarkerConfigurationScreen.route) {

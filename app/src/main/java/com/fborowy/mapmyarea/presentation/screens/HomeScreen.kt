@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.data.UserData
+import com.fborowy.mapmyarea.data.classes.UserData
 import com.fborowy.mapmyarea.domain.view_models.AppViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
