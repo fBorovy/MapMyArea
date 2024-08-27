@@ -29,7 +29,7 @@ class AppViewModel(
     private val maxMapNameLength = 50
     private val _addingMapState = MutableStateFlow(AddingMapState())
     val addingMapState: StateFlow<AddingMapState> = _addingMapState
-    private val _mapDeletionIssue = MutableStateFlow(true)
+    private val _mapDeletionIssue = MutableStateFlow(false)
     val mapDeletionIssue: StateFlow<Boolean> = _mapDeletionIssue
     private var _collectingUserInfoError = MutableStateFlow("")
     val collectingUserInfoError: StateFlow<String?> = _collectingUserInfoError

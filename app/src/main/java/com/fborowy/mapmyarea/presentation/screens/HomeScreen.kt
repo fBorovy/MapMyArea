@@ -1,6 +1,6 @@
 package com.fborowy.mapmyarea.presentation.screens
 
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -63,13 +63,10 @@ fun HomeScreen(
     var mapToDeleteName by rememberSaveable { mutableStateOf("") }
     val mapDeletionIssue by appViewModel.mapDeletionIssue.collectAsState()
 
-    if (userData.userId == null || collectingUserDataError != "") {
-        Toast.makeText(
-            context, collectingUserDataError, Toast.LENGTH_LONG
-        ).show()
-        onSignOut()
-    }
+
     for (map in userData.savedMaps!!) {
+        Log.d("MAPA", "map: ${map.mapName}, owner:${map.owner}")
+
         if (userData.userId == map.owner) ownedMaps.add(map)
         else savedMaps.add(map)
     }
