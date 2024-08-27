@@ -3,10 +3,11 @@ package com.fborowy.mapmyarea.domain.view_models
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fborowy.mapmyarea.R
+import com.fborowy.mapmyarea.data.Repository
 import com.fborowy.mapmyarea.data.classes.FloorData
 import com.fborowy.mapmyarea.data.classes.MapData
 import com.fborowy.mapmyarea.data.classes.MarkerData
-import com.fborowy.mapmyarea.data.Repository
+import com.fborowy.mapmyarea.data.classes.RoomData
 import com.fborowy.mapmyarea.domain.MarkerType
 import com.fborowy.mapmyarea.domain.states.NewFloorState
 import com.fborowy.mapmyarea.domain.states.NewMapState

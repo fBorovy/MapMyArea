@@ -18,9 +18,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.fborowy.mapmyarea.domain.Screen
 import com.fborowy.mapmyarea.data.EmailAuthClient
 import com.fborowy.mapmyarea.data.GoogleAuthClient
+import com.fborowy.mapmyarea.domain.Screen
 import com.fborowy.mapmyarea.domain.view_models.AppViewModel
 import com.fborowy.mapmyarea.domain.view_models.LocationPermissionViewModel
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
@@ -38,7 +38,6 @@ import com.fborowy.mapmyarea.presentation.screens.MapScreen
 import com.fborowy.mapmyarea.presentation.screens.MarkerConfigurationScreen
 import com.fborowy.mapmyarea.presentation.screens.StartScreen
 import com.google.android.gms.auth.api.identity.Identity
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -46,21 +45,20 @@ fun AppNavigation(
     applicationContext: Context,
     lifecycleScope: LifecycleCoroutineScope,
     activity: Activity,
-    appViewModel: AppViewModel = viewModel(),
 ) {
 
-    val mapCreatorViewModel = viewModel<MapCreatorViewModel>()
+    val appViewModel: AppViewModel = viewModel()
+    val mapCreatorViewModel: MapCreatorViewModel = viewModel()
+    val mapViewModel: MapViewModel = viewModel()
     val signInState by appViewModel.signInState.collectAsStateWithLifecycle()
-    val emailAuthClient = EmailAuthClient(appViewModel.auth, viewModel.database)
+    val emailAuthClient = EmailAuthClient()
     val googleAuthUiClient by lazy {
         GoogleAuthClient(
             context = applicationContext,
-            oneTapClient = Identity.getSignInClient(applicationContext),
-            appViewModel.auth
+            oneTapClient = Identity.getSignInClient(applicationContext)
         )
     }
     val navController = rememberNavController()
-    val mapViewModel = MapViewModel()
 
 
     NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
@@ -85,31 +83,15 @@ fun AppNavigation(
 
             LaunchedEffect(key1 = signInState.signInSuccessful){
                 if (signInState.signInSuccessful){
-                    val user = appViewModel.auth.currentUser
-                    appViewModel.database.collection("users")
-                        .document(user!!.uid)
-                        .get()
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val document = task.result
-                                if (!(document.exists())) {
-                                    val newFirestoreUser = hashMapOf(
-                                        "username" to user.displayName,
-                                        "savedMaps" to null,
-                                    )
-                                    viewModel.database.collection("users")
-                                        .document(user.email!!)
-                                        .set(newFirestoreUser)
-                                }
-                            }
-                        }
+                    appViewModel.addUserDataToFirestoreIfItsNotThere()
+
                     Toast.makeText(
                         applicationContext,
                         applicationContext.resources.getString(R.string.toast_sign_in),
                         Toast.LENGTH_LONG
                     ).show()
                     navController.navigate(Screen.HomeScreen.route)
-                    viewModel.resetSignInState()
+                    appViewModel.resetSignInState()
                 }
             }
 
@@ -162,13 +144,13 @@ fun AppNavigation(
                 )
             }
             LaunchedEffect(key1 = Unit) {
-                viewModel.viewModelScope.launch {
-                    viewModel.getSignedUserInfo()
+                appViewModel.viewModelScope.launch {
+                    appViewModel.getSignedUserInfo()
                 }
             }
 
             HomeScreen(
-                appViewModel = viewModel,
+                appViewModel = appViewModel,
                 onCreateMap = {
                     locationPermissionViewModel.checkAndRequestPermissions(
                         context = applicationContext,
@@ -190,7 +172,7 @@ fun AppNavigation(
                     }
                 },
                 onOpenMap = {
-                    viewModel.switchDisplayedMap(it)
+                    appViewModel.switchDisplayedMap(it)
                     locationPermissionViewModel.checkAndRequestPermissions(
                         context = applicationContext,
                         navController = navController,
@@ -204,7 +186,7 @@ fun AppNavigation(
         composable(route = Screen.MapScreen.route) {
             MapScreen(
                 mapViewModel,
-                viewModel.getDisplayedMapInfo(),
+                appViewModel.getDisplayedMapInfo(),
                 navController
             )
         }
@@ -218,7 +200,7 @@ fun AppNavigation(
                         Toast.LENGTH_LONG
                     ).show()
                     navController.navigate(Screen.HomeScreen.route)
-                    viewModel.resetSignInState()
+                    appViewModel.resetSignInState()
                 }
             }
 
@@ -226,7 +208,7 @@ fun AppNavigation(
                 navController = navController,
                 emailAuthClient,
                 onSignUpClick = {
-                    viewModel.onSignIn(it)
+                    appViewModel.onSignIn(it)
                 }
             )
         }
@@ -240,14 +222,14 @@ fun AppNavigation(
                         Toast.LENGTH_LONG
                     ).show()
                     navController.navigate(Screen.HomeScreen.route)
-                    viewModel.resetSignInState()
+                    appViewModel.resetSignInState()
                 }
             }
 
             EmailSignInScreen(
                 navController = navController,
                 emailAuthClient = emailAuthClient,
-                onSignInClick = { viewModel.onSignIn(it) }
+                onSignInClick = { appViewModel.onSignIn(it) }
             )
         }
         composable(route = Screen.MapCreatorScreen1.route) {

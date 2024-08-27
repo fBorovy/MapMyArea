@@ -9,17 +9,14 @@ import com.fborowy.mapmyarea.data.classes.UserData
 import com.fborowy.mapmyarea.domain.states.AddingMapState
 import com.fborowy.mapmyarea.domain.states.SignInResult
 import com.fborowy.mapmyarea.domain.states.SignInState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AppViewModel @Inject constructor(
-    private val repository: Repository,
+class AppViewModel(
+    private val repository: Repository = Repository(),
 ): ViewModel() {
 
     private val _signInState = MutableStateFlow(SignInState())
@@ -136,5 +133,9 @@ class AppViewModel @Inject constructor(
 
     fun checkIfLogged(): Boolean {
         return repository.checkIfLogged()
+    }
+
+    fun addUserDataToFirestoreIfItsNotThere() {
+        repository.addUserDataToFirestoreIfItsNotThere()
     }
 }

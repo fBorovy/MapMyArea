@@ -14,16 +14,18 @@ import com.fborowy.mapmyarea.domain.states.SavingMapState
 import com.fborowy.mapmyarea.domain.trimEmail
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class Repository @Inject constructor(
-    private val database: FirebaseFirestore,
-    private val auth: FirebaseAuth
+class Repository (
+    private val database: FirebaseFirestore = Firebase.firestore,
+    private val auth: FirebaseAuth = Firebase.auth
 ) {
 
     private val userDocumentReference = database.collection("users").document(auth.currentUser!!.email!!)
@@ -200,5 +202,26 @@ class Repository @Inject constructor(
             northEastBound = mapDocumentSnapshot.getGeoPoint("northEastBound"),
             southWestBound = mapDocumentSnapshot.getGeoPoint("southWestBound"),
         )
+    }
+
+    fun addUserDataToFirestoreIfItsNotThere() {
+        val user = auth.currentUser
+        database.collection("users")
+            .document(user!!.uid)
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val document = task.result
+                    if (!(document.exists())) {
+                        val newFirestoreUser = hashMapOf(
+                            "username" to user.displayName,
+                            "savedMaps" to null,
+                        )
+                        database.collection("users")
+                            .document(user.email!!)
+                            .set(newFirestoreUser)
+                    }
+                }
+            }
     }
 }

@@ -6,13 +6,16 @@ import com.fborowy.mapmyarea.data.classes.UserData
 import com.fborowy.mapmyarea.domain.states.SignInResult
 import com.fborowy.mapmyarea.domain.trimEmail
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
 
 class EmailAuthClient(
-    private val auth: FirebaseAuth,
-    private val database: FirebaseFirestore
+    private val auth: FirebaseAuth = Firebase.auth,
+    private val database: FirebaseFirestore = Firebase.firestore
 ): ViewModel() {
     suspend fun signUpWithEmail(email: String, password: String, onComplete: (SignInResult) -> Unit) {
         val docRef = database.collection("users").document(email)
