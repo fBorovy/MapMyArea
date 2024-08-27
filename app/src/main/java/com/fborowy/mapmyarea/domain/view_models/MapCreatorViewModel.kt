@@ -1,7 +1,7 @@
 package com.fborowy.mapmyarea.domain.view_models
 
 import androidx.lifecycle.ViewModel
-import com.fborowy.mapmyarea.data.MapRepository
+import com.fborowy.mapmyarea.data.Repository
 import com.fborowy.mapmyarea.data.classes.FloorData
 import com.fborowy.mapmyarea.data.classes.MapData
 import com.fborowy.mapmyarea.data.classes.MarkerData
@@ -21,10 +21,12 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+const val MIN_MAP_NAME_LENGTH = 3
+val FORBIDDEN_MAP_NAME_CHARACTERS = listOf('/', '*', '[', ']', '{', '}', '#', '%', '?')
 @Suppress("SameParameterValue")
 class MapCreatorViewModel: ViewModel() {
 
-    private val mapRepository: MapRepository = MapRepository()
+    private val repository: Repository = Repository()
 
     private var _newMapState = MutableStateFlow(NewMapState())
     val newMapState: StateFlow<NewMapState> = _newMapState
@@ -121,7 +123,7 @@ class MapCreatorViewModel: ViewModel() {
         }
     }
     fun saveNewMap() {
-        mapRepository.addNewMap(
+        repository.addNewMap(
             MapData(
                 mapName = _newMapState.value.name,
                 mapDescription = _newMapState.value.description,

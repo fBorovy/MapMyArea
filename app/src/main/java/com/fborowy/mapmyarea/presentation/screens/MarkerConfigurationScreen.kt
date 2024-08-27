@@ -120,7 +120,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        if (mapCreatorViewModel.getMarkerType() == MarkerType.Building) {
+        if (mapCreatorViewModel.getMarkerType() == MarkerType.BUILDING) {
             MMAContentBox {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally

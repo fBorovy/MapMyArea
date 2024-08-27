@@ -14,17 +14,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import com.fborowy.mapmyarea.R
-import com.fborowy.mapmyarea.data.classes.UserData
+import com.fborowy.mapmyarea.data.classes.MapData
 import com.fborowy.mapmyarea.domain.view_models.AppViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
@@ -37,9 +38,28 @@ fun HomeScreen(
     onCreateMap: () -> Unit,
 ) {
     val context = LocalContext.current
-    var userData by remember { mutableStateOf<UserData?>(null) }
-    LaunchedEffect(key1 = Unit){
-        userData = appViewModel.getSignedUserInfo()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val savedMaps = mutableListOf<MapData>()
+    val ownedMaps = mutableListOf<MapData>()
+    val searchText by appViewModel.searchText.collectAsState()
+    val addingMapState by appViewModel.addingMapState.collectAsState()
+    val userData by appViewModel.userData.collectAsState()
+//    val collectingUserDataError by appViewModel.collectingUserInfoError.collectAsState()
+//    var showSearchBarInstruction by rememberSaveable { mutableStateOf(false) }
+//    var showSavedMapRemovalConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+//    var showOwnMapDeletionConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+    var mapToDeleteName by rememberSaveable { mutableStateOf("") }
+    val mapDeletionIssue by appViewModel.mapDeletionIssue.collectAsState()
+
+//    if (userData.userId == null || collectingUserDataError != "") {
+//        Toast.makeText(
+//            context, collectingUserDataError, Toast.LENGTH_LONG
+//        ).show()
+//        onSignOut()
+//    }
+    for (map in userData.savedMaps!!) {
+        if (userData.userId == map.owner) ownedMaps.add(map)
+        else savedMaps.add(map)
     }
 
     Column(
