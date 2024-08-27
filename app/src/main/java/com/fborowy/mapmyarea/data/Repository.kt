@@ -200,14 +200,14 @@ class Repository (
     fun addUserDataToFirestoreIfItsNotThere() {
         val user = auth.currentUser
         database.collection("users")
-            .document(user!!.uid)
+            .document(user!!.email!!)
             .get()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val document = task.result
                     if (!(document.exists())) {
                         val newFirestoreUser = hashMapOf(
-                            "username" to user.displayName,
+                            "username" to trimEmail(user.email!!),
                             "savedMaps" to null,
                         )
                         database.collection("users")

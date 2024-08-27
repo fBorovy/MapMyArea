@@ -141,6 +141,16 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.weight(1f))
                             Icon(
+                                painter = painterResource(id = R.drawable.edit_pencil),
+                                contentDescription = stringResource(id = R.string.edit_map_icon),
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .padding(top = 4.dp)
+                                    .clickable {
+                                        //TODO
+                                    }
+                            )
+                            Icon(
                                 painter = painterResource(id = R.drawable.delete_24),
                                 contentDescription = stringResource(id = R.string.delete_description),
                                 modifier = Modifier

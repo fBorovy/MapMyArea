@@ -97,5 +97,6 @@
     <string name="map_not_deleted">Couldn\'t delete map. Check your internet connection or try later.</string>
     <string name="error_getting_user_info">Couldn\'t load user info. Try again later.</string>
     <string name="unknown_registering_user_error">Couldn\'t create user, try again later.</string>
+    <string name="edit_map_icon">Edit map</string>
 
 </resources>
