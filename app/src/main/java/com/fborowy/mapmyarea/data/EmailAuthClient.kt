@@ -21,7 +21,7 @@ class EmailAuthClient(
         val docRef = database.collection("users").document(email)
         val userDocument = docRef.get().await()
         if (userDocument.exists()) {
-            throw Exception("exists")
+            onComplete(SignInResult(null, errorMessage = "exists"))
         }
 
         auth.createUserWithEmailAndPassword(email, password)

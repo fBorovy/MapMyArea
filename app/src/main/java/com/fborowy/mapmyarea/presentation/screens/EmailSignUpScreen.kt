@@ -1,6 +1,5 @@
 package com.fborowy.mapmyarea.presentation.screens
 
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -13,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -42,6 +43,7 @@ fun EmailSignUpScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val maxUsernameLength = 50
     val maxPasswordLength = 30
+    val errorCode by registrationViewModel.errorCode.collectAsState()
 
     Column(
         modifier = Modifier
@@ -107,30 +109,18 @@ fun EmailSignUpScreen(
                 MMAButton(
                     text = stringResource(R.string.register),
                     onClick = {
-                        val result = registrationViewModel.validate()
-                        if (result != 0) showRegisteringErrorMessage(context, error = result)
-                        else {
-                            try {
-                                registrationViewModel.signUp(emailAuthClient){
-                                    if (it.data == null) {
-                                        Toast.makeText(
-                                            context,
-                                            it.errorMessage,
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    } else {
-                                        onSignUpClick(it)
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                Toast
-                                    .makeText(
+                        registrationViewModel.validate()
+                        if (errorCode == 0) {
+                            registrationViewModel.signUp(emailAuthClient) {
+                                if (it.data == null) {
+                                    Toast.makeText(
                                         context,
-                                        if (e.message == "exists") context.resources.getString(R.string.user_already_exists)
-                                        else context.resources.getString(R.string.failed_to_sign_in),
+                                        it.errorMessage,
                                         Toast.LENGTH_LONG
-                                    )
-                                    .show()
+                                    ).show()
+                                } else {
+                                    onSignUpClick(it)
+                                }
                             }
                         }
                     }
@@ -138,26 +128,13 @@ fun EmailSignUpScreen(
             }
         }
     }
-}
 
-
-fun showRegisteringErrorMessage(context: Context, error: Int) {
-
-    when (error) {
-        1 -> Toast.makeText(
+    if (errorCode != 0) {
+        Toast.makeText(
             context,
-            context.resources.getString(R.string.short_password_error),
+            stringResource(id = errorCode),
             Toast.LENGTH_LONG
         ).show()
-        2 -> Toast.makeText(
-            context,
-            context.resources.getString(R.string.passwords_differ_error),
-            Toast.LENGTH_LONG
-        ).show()
-        3 -> Toast.makeText(
-            context,
-            context.resources.getString(R.string.empty_email_error),
-            Toast.LENGTH_LONG
-        ).show()
+        registrationViewModel.resetErrorCode()
     }
 }

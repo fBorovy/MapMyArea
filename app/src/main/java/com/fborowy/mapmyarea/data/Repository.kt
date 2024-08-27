@@ -1,6 +1,5 @@
 package com.fborowy.mapmyarea.data
 
-import android.content.ContentValues.TAG
 import android.util.Log
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.data.classes.FloorData
@@ -28,13 +27,12 @@ class Repository (
     private val auth: FirebaseAuth = Firebase.auth
 ) {
 
-    private val userDocumentReference = database.collection("users").document(auth.currentUser!!.email!!)
-
     fun checkIfLogged(): Boolean {
         return (auth.currentUser != null)
     }
     suspend fun getSignedUserInfo(): UserData? {
         return try {
+            val userDocumentReference = database.collection("users").document(auth.currentUser!!.email!!)
             val userDocumentSnapshot = userDocumentReference.get().await()
 
             if (userDocumentSnapshot.exists()) {
@@ -102,23 +100,16 @@ class Repository (
         var returnValue = SavingMapState(true, null)
 
         docRef.set(newMap)
-            .addOnSuccessListener {
-                Log.d(TAG, "DocumentSnapshot written with ID: ${docRef.id}")
-            }
             .addOnFailureListener {
                 returnValue = SavingMapState(false, it.message)
             }.await()
-//TODO
-//        try {
-//            userDocumentReference.update("savedMaps", FieldValue.arrayUnion("/maps/${mapId}")).await()
-//        } catch (e: Exception) {
-//            throw e
-//        }
-//        try {
-//            appViewModel.addNewUserMap(docRef.id)
-//        } catch (e: Exception) {
-//            returnValue =  SavingMapState(false, e.message)
-//        }
+
+        try {
+            val userDocumentReference = database.collection("users").document(auth.currentUser!!.email!!)
+            userDocumentReference.update("savedMaps", FieldValue.arrayUnion("/maps/${map.mapName}")).await()
+        } catch (e: Exception) {
+            returnValue = SavingMapState(false, e.message)
+        }
         return returnValue
     }
 
@@ -128,6 +119,7 @@ class Repository (
             return AddingMapState(false, R.string.map_not_found)
         }
         return try {
+            val userDocumentReference = database.collection("users").document(auth.currentUser!!.email!!)
             userDocumentReference.update("savedMaps", FieldValue.arrayUnion("/maps/${mapId}"))
                 .await()
             AddingMapState(true, null, getMapFromMapPath("/maps/${mapId}"))
@@ -147,6 +139,7 @@ class Repository (
 
     fun removeMapFromUserMaps(mapName: String) {
         try {
+            val userDocumentReference = database.collection("users").document(auth.currentUser!!.email!!)
             userDocumentReference.update(
                 "savedMaps",
                 FieldValue.arrayRemove("/maps/${mapName}")

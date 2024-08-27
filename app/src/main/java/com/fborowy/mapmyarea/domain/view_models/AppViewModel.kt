@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AppViewModel(
-    private val repository: Repository = Repository(),
+    private val repository: Repository = Repository()
 ): ViewModel() {
 
     private val _signInState = MutableStateFlow(SignInState())
@@ -95,6 +95,7 @@ class AppViewModel(
                 _userData.update { it.copy(
                     savedMaps = it.savedMaps!!.plus(addingMapState.addedMap!!)
                 ) }
+                _searchText.value = ""
             } else {
                 _addingMapState.update {
                     AddingMapState(false, addingMapState.errorCode)
@@ -102,7 +103,6 @@ class AppViewModel(
             }
         }
     }
-
 
     fun resetAddingMapState() {
         _addingMapState.update {

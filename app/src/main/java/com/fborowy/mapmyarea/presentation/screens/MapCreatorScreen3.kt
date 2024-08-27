@@ -71,8 +71,7 @@ fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: N
                             mapCreatorViewModel.setNewMapName(it)
                         } else {
                             mapCreatorViewModel.setNewMapName(it.take(maxMapNameLength))
-                        }
-                               },
+                        }},
                     placeholder = { Text(text = stringResource(id = R.string.map_name)) },
                     isHidden = false,
                 )

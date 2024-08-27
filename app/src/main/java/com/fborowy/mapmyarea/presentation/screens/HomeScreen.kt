@@ -1,6 +1,6 @@
 package com.fborowy.mapmyarea.presentation.screens
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -65,10 +65,17 @@ fun HomeScreen(
 
 
     for (map in userData.savedMaps!!) {
-        Log.d("MAPA", "map: ${map.mapName}, owner:${map.owner}")
-
         if (userData.userId == map.owner) ownedMaps.add(map)
         else savedMaps.add(map)
+    }
+
+    if (collectingUserDataError != "") {
+        Toast.makeText(
+            context,
+            stringResource(id = R.string.error_getting_user_info),
+            Toast.LENGTH_LONG
+        ).show()
+        onSignOut()
     }
 
     Column(

@@ -95,5 +95,7 @@
     <string name="assure_saved_map_removal">Remove map from saved maps?\n You can add it back anytime.</string>
     <string name="assure_own_map_deletion">Delete the map?\n All users will loose access to it.\n This operation cannot be undone.</string>
     <string name="map_not_deleted">Couldn\'t delete map. Check your internet connection or try later.</string>
+    <string name="error_getting_user_info">Couldn\'t load user info. Try again later.</string>
+    <string name="unknown_registering_user_error">Couldn\'t create user, try again later.</string>
 
 </resources>

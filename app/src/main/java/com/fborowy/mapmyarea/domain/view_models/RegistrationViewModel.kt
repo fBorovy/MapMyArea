@@ -5,8 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.data.EmailAuthClient
 import com.fborowy.mapmyarea.domain.states.SignInResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RegistrationViewModel: ViewModel() {
@@ -19,14 +23,16 @@ class RegistrationViewModel: ViewModel() {
         private set
     private val minimalPasswordLength = 6
 
-    fun validate(): Int {
+    private val _errorCode = MutableStateFlow(0)
+    val errorCode: StateFlow<Int> = _errorCode
+
+    fun validate() {
         if (password1.length < minimalPasswordLength)
-            return 1
+            _errorCode.update { R.string.short_password_error }
         if (password1 != password2)
-            return 2
+            R.string.passwords_differ_error
         if (email == "")
-            return 3
-        return 0
+            R.string.empty_email_error
     }
 
     fun updateEmailField(newEmail: String) {
@@ -48,11 +54,16 @@ class RegistrationViewModel: ViewModel() {
                     email,
                     password2,
                 ) {
-                    onSignUpClick(it)
+                    if (it.errorMessage == "exists") _errorCode.update { R.string.user_already_exists }
+                    else onSignUpClick(it)
                 }
             } catch (e: Exception) {
-                throw e
+                _errorCode.value = R.string.unknown_registering_user_error
             }
         }
+    }
+
+    fun resetErrorCode() {
+        _errorCode.update { 0 }
     }
 }
