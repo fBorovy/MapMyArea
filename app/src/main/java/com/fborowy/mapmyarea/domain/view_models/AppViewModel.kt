@@ -131,7 +131,7 @@ class AppViewModel(
     fun removeMapFromUserSaved(mapName: String) {
         viewModelScope.launch {
             try {
-                repository.removeMapFromUserMaps(mapName)
+                repository.removeMapFromUserMaps("/maps/${mapName}")
                 for (map in _userData.value.savedMaps!!) {
                     if (map.mapName == mapName) {
                         _userData.update { it.copy(

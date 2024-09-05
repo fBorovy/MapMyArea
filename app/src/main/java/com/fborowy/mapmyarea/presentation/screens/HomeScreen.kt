@@ -167,6 +167,7 @@ fun HomeScreen(
                                     .clickable {
                                         keyboardController?.hide()
                                         mapToDeleteName = map.mapName!!
+                                        showOwnMapDeletionConfirmationDialog = true
                                     }
                             )
                         }

@@ -40,7 +40,10 @@ class Repository (
                 val savedMapsPaths: List<String>? = userDocumentSnapshot.get("savedMaps") as List<String>?
                 if (savedMapsPaths != null) {
                     for (mapPath in savedMapsPaths) {
-                        savedMaps = savedMaps + getMapFromMapPath(mapPath)
+                        val map = getMapFromMapPath(mapPath)
+                        if (map != null) {
+                            savedMaps = savedMaps + map
+                        }
                     }
                 }
 
@@ -137,20 +140,24 @@ class Repository (
         }
     }
 
-    fun removeMapFromUserMaps(mapName: String) {
+    fun removeMapFromUserMaps(mapPath: String) {
         try {
             val userDocumentReference = database.collection("users").document(auth.currentUser!!.email!!)
             userDocumentReference.update(
                 "savedMaps",
-                FieldValue.arrayRemove("/maps/${mapName}")
+                FieldValue.arrayRemove(mapPath)
             )
         } catch (e: Exception) {
             throw e
         }
     }
 
-    private suspend fun getMapFromMapPath(mapPath: String): MapData {
+    private suspend fun getMapFromMapPath(mapPath: String): MapData? {
         val mapDocumentSnapshot = database.document(mapPath).get().await()
+        if (!mapDocumentSnapshot.exists()) {
+            removeMapFromUserMaps(mapPath)
+            return null
+        }
         Log.d("XD", mapDocumentSnapshot.get("markers").toString())
         val markers = mutableListOf<MarkerData>()
         val markersSnapshot = mapDocumentSnapshot.get("markers") as ArrayList<*>
