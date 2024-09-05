@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
+import com.fborowy.mapmyarea.data.classes.MapData
 import com.fborowy.mapmyarea.domain.Screen
 import com.fborowy.mapmyarea.domain.view_models.MapCreatorViewModel
 import com.fborowy.mapmyarea.presentation.components.MMAButton
@@ -33,15 +34,18 @@ import com.fborowy.mapmyarea.presentation.components.MMATextField
 import kotlinx.coroutines.flow.map
 
 @Composable
-fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: NavController) {
+fun MapCreatorScreen3(
+    mapCreatorViewModel: MapCreatorViewModel,
+    navController: NavController,
+    onMapCreated: (MapData) -> Unit,
+) {
 
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val mapName by mapCreatorViewModel.newMapState.map { it.name }.collectAsState(initial = "")
     val mapDescription by mapCreatorViewModel.newMapState.map { it.description }.collectAsState(initial = "")
     val savingMapState by mapCreatorViewModel.savingMapState.collectAsState()
-    val maxMapNameLength = 40
-    val maxMapDescriptionLength = 150
+
 
     Column(
         modifier = Modifier
@@ -56,7 +60,7 @@ fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: N
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         MMAHeader(
-            header = stringResource(id = R.string.map_creator_screen_title),
+            header = mapCreatorViewModel.originalMapName?: stringResource(id = R.string.map_creator_screen_title),
             onGoBack = { navController.popBackStack() }
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -66,24 +70,15 @@ fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: N
             ) {
                 MMATextField(
                     value = mapName,
-                    onValueChange = {
-                        if (it.length <= maxMapNameLength) {
-                            mapCreatorViewModel.setNewMapName(it)
-                        } else {
-                            mapCreatorViewModel.setNewMapName(it.take(maxMapNameLength))
-                        }},
+                    onValueChange = { mapCreatorViewModel.setNewMapName(it) },
                     placeholder = { Text(text = stringResource(id = R.string.map_name)) },
                     isHidden = false,
+                    enabled = mapCreatorViewModel.originalMapName == null,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 MMATextField(
                     value = mapDescription,
-                    onValueChange = {
-                        if (mapDescription.length <= maxMapDescriptionLength) {
-                            mapCreatorViewModel.setNewMapDescription(it)
-                        } else {
-                            mapCreatorViewModel.setNewMapDescription(it.take(maxMapDescriptionLength))
-                        }},
+                    onValueChange = { mapCreatorViewModel.setNewMapDescription(it) },
                     placeholder = { Text(text = stringResource(id = R.string.map_description)) },
                     isHidden = false,
                 )
@@ -95,7 +90,9 @@ fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: N
             onClick = {
                 if (mapCreatorViewModel.checkFirestoreNameValidity()) {
                     try {
-                        mapCreatorViewModel.saveNewMap()
+                        val map = mapCreatorViewModel.getMapDataFromMapState()
+                        mapCreatorViewModel.saveMap(map)
+                        onMapCreated(map)
                     } catch (e: Exception) {
                         Toast.makeText(
                             context,
@@ -113,6 +110,7 @@ fun MapCreatorScreen3(mapCreatorViewModel: MapCreatorViewModel, navController: N
             }
         )
     }
+
     if (savingMapState.saveMapSuccessful) {
         MMAInstructionPopup(
             content = stringResource(id = R.string.map_saved_popup),

@@ -48,11 +48,10 @@ fun HomeScreen(
     onSignOut: () -> Unit,
     onCreateMap: () -> Unit,
     onOpenMap: (MapData) -> Unit,
+    onEditMap: (MapData) -> Unit,
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val savedMaps = mutableListOf<MapData>()
-    val ownedMaps = mutableListOf<MapData>()
     val searchText by appViewModel.searchText.collectAsState()
     val addingMapState by appViewModel.addingMapState.collectAsState()
     val userData by appViewModel.userData.collectAsState()
@@ -62,12 +61,8 @@ fun HomeScreen(
     var showOwnMapDeletionConfirmationDialog by rememberSaveable { mutableStateOf(false) }
     var mapToDeleteName by rememberSaveable { mutableStateOf("") }
     val mapDeletionIssue by appViewModel.mapDeletionIssue.collectAsState()
-
-
-    for (map in userData.savedMaps!!) {
-        if (userData.userId == map.owner) ownedMaps.add(map)
-        else savedMaps.add(map)
-    }
+    val savedMaps: MutableList<MapData> = mutableListOf()
+    val ownedMaps: MutableList<MapData> = mutableListOf()
 
     if (collectingUserDataError != "") {
         Toast.makeText(
@@ -76,6 +71,11 @@ fun HomeScreen(
             Toast.LENGTH_LONG
         ).show()
         onSignOut()
+    }
+
+    for (map in userData.savedMaps!!) {
+        if (map.owner == userData.userId) ownedMaps.add(map)
+        else savedMaps.add(map)
     }
 
     Column(
@@ -106,12 +106,18 @@ fun HomeScreen(
         Row {
             MMAButton(
                 text = context.getString(R.string.create_map),
-                onClick = onCreateMap
+                onClick = {
+                    appViewModel.clearSearchText()
+                    onCreateMap()
+                }
             )
             Spacer(modifier = Modifier.width(10.dp))
             MMAButton(
                 text = context.getString(R.string.signOut),
-                onClick = onSignOut
+                onClick = {
+                    appViewModel.clearSearchText()
+                    onSignOut()
+                }
             )
         }
         if (ownedMaps.isNotEmpty()) {
@@ -136,6 +142,7 @@ fun HomeScreen(
                             Text(
                                 text = "${map.mapName}",
                                 modifier = Modifier.clickable {
+                                    appViewModel.clearSearchText()
                                     onOpenMap(map)
                                 }
                             )
@@ -147,7 +154,8 @@ fun HomeScreen(
                                     .size(30.dp)
                                     .padding(top = 4.dp)
                                     .clickable {
-                                        //TODO
+                                        appViewModel.clearSearchText()
+                                        onEditMap(map)
                                     }
                             )
                             Icon(
@@ -191,7 +199,7 @@ fun HomeScreen(
                     MMAButton(
                         text = stringResource(id = R.string.add_map),
                         onClick = {
-                            appViewModel.addMapToUserSavedMaps()
+                            appViewModel.addMapToUserSavedMapsFromSearch()
                         }
                     )
                 }
@@ -218,6 +226,7 @@ fun HomeScreen(
                         Text(
                             text = "${map.mapName}",
                             modifier = Modifier.clickable {
+                                appViewModel.clearSearchText()
                                 onOpenMap(map)
                             }
                         )
@@ -240,6 +249,7 @@ fun HomeScreen(
         }
     }
     if (addingMapState.addingSuccessful) {
+        appViewModel.clearSearchText()
         keyboardController?.hide()
         appViewModel.clearSearchText()
         appViewModel.resetAddingMapState()
@@ -264,6 +274,7 @@ fun HomeScreen(
             onConfirm = {
                 appViewModel.removeMapFromUserSaved(mapToDeleteName)
                 mapToDeleteName = ""
+                showSavedMapRemovalConfirmationDialog = false
             },
             onConfirmLabel = stringResource(id = R.string.confirm)
         )
@@ -276,6 +287,7 @@ fun HomeScreen(
             onConfirm = {
                 appViewModel.deleteMap(mapToDeleteName)
                 mapToDeleteName = ""
+                showOwnMapDeletionConfirmationDialog = false
             }
         )
     }

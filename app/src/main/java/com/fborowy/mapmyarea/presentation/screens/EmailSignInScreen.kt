@@ -45,6 +45,7 @@ fun EmailSignInScreen(
     val maxUsernameLength = 50
     val maxPasswordLength = 30
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,11 +72,12 @@ fun EmailSignInScreen(
                 MMATextField(
                     value = email,
                     onValueChange = {
-                        if (it.length <= maxUsernameLength) {
-                            email = it
+                        email = if (it.length <= maxUsernameLength) {
+                            it
                         } else {
-                            email = it.take(maxUsernameLength)
-                        }},
+                            it.take(maxUsernameLength)
+                        }
+                    },
                     placeholder = { Text(text = stringResource(R.string.enter_email)) },
                     isHidden = false,
                 )

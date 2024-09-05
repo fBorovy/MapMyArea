@@ -69,7 +69,7 @@ class AppViewModel(
         else _searchText.update { text.take(maxMapNameLength) }
     }
 
-    fun addMapToUserSavedMaps() {
+    fun addMapToUserSavedMapsFromSearch() {
         if (
             _searchText.value.length < MIN_MAP_NAME_LENGTH ||
             FORBIDDEN_MAP_NAME_CHARACTERS.any { _searchText.value.contains(it) } ||
@@ -92,9 +92,9 @@ class AppViewModel(
         viewModelScope.launch {
             val addingMapState = repository.saveMapForUser(searchText.value)
             if (addingMapState.addingSuccessful) {
-                _userData.update { it.copy(
-                    savedMaps = it.savedMaps!!.plus(addingMapState.addedMap!!)
-                ) }
+                    _userData.update { it.copy(
+                        savedMaps = it.savedMaps!!.plus(addingMapState.addedMap!!)
+                    )}
                 _searchText.value = ""
             } else {
                 _addingMapState.update {
@@ -114,13 +114,31 @@ class AppViewModel(
     }
 
     fun deleteMap(mapName: String) {
-        repository.deleteOwnMap(mapName)
+        try {
+            repository.deleteOwnMap(mapName)
+            for (map in _userData.value.savedMaps!!) {
+                if (map.owner == _userData.value.userId) {
+                    _userData.update { it.copy(
+                        savedMaps = it.savedMaps!!.minus(map)
+                    ) }
+                }
+            }
+        } catch (e: Exception) {
+            _mapDeletionIssue.update { true }
+        }
     }
 
     fun removeMapFromUserSaved(mapName: String) {
         viewModelScope.launch {
             try {
                 repository.removeMapFromUserMaps(mapName)
+                for (map in _userData.value.savedMaps!!) {
+                    if (map.mapName == mapName) {
+                        _userData.update { it.copy(
+                            savedMaps = it.savedMaps!!.minus(map)
+                        ) }
+                    }
+                }
             } catch (e: Exception) {
                 _mapDeletionIssue.update { true }
             }
@@ -137,5 +155,19 @@ class AppViewModel(
 
     fun addUserDataToFirestoreIfItsNotThere() {
         repository.addUserDataToFirestoreIfItsNotThere()
+    }
+
+    fun addMapToUserSavedMaps(newMap: MapData) {
+        newMap.owner = _userData.value.userId
+        for (map in _userData.value.savedMaps!!) {
+            if (map.mapName == newMap.mapName) {
+                _userData.update { it.copy(
+                    savedMaps = it.savedMaps!!.minus(map)
+                )}
+            }
+        }
+        _userData.update { it.copy(
+            savedMaps = it.savedMaps!!.plus(newMap)
+        ) }
     }
 }

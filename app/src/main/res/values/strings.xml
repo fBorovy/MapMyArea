@@ -98,5 +98,10 @@
     <string name="error_getting_user_info">Couldn\'t load user info. Try again later.</string>
     <string name="unknown_registering_user_error">Couldn\'t create user, try again later.</string>
     <string name="edit_map_icon">Edit map</string>
+    <string name="failed_to_sign_up">Unknown error, couldn\'t sign up. Try again later.</string>
+    <string name="edit_marker_icon">Edit marker</string>
+    <string name="delete_marker_icon">Delete marker</string>
+    <string name="remove_marker_confitmation">Are you sure you want to remove this element?</string>
+    <string name="marker_name_in_use">There already is a point with this name in your map. Provide other name.</string>
 
 </resources>

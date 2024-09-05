@@ -4,7 +4,7 @@ import com.google.firebase.firestore.GeoPoint
 
 data class MapData(
     val mapName: String?, //id w firestore
-    val owner: String? = null,
+    var owner: String? = null,
     val mapDescription: String = "",
     val northEastBound: GeoPoint?,
     val southWestBound: GeoPoint?,

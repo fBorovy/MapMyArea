@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +47,7 @@ import com.fborowy.mapmyarea.domain.view_models.MapViewModel
 import com.fborowy.mapmyarea.presentation.MapStyle
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
 import com.fborowy.mapmyarea.presentation.components.MMAHeader
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -55,6 +57,10 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.launch
+
+const val CENTER_MAP_DURATION_IN_MS = 350
 
 @Composable
 fun MapScreen(
@@ -67,6 +73,9 @@ fun MapScreen(
     var showMarkerInfo by rememberSaveable { mutableStateOf(false) }
     val displayedMarker by mapViewModel.currentMarkerInfo.collectAsState()
     val selectedLocation = rememberSaveable { mutableStateOf<LatLng?>(null) }
+    val cameraPositionState = rememberCameraPositionState()
+    val coroutineScope = rememberCoroutineScope()
+
 
     val mapUiSettings = MapUiSettings(
         rotationGesturesEnabled = true,
@@ -124,6 +133,7 @@ fun MapScreen(
                     selectedLocation.value = it
                 },
                 contentPadding = PaddingValues(top = 60.dp),
+                cameraPositionState = cameraPositionState,
             ) {
                 val markerParkingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
                     BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 100, 100, true))
@@ -131,22 +141,34 @@ fun MapScreen(
                     BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 100, 100, true))
                 val markerOtherBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
                     BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 100, 100, true))
+                val biggerMarkerParkingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 120, 120, true))
+                val biggerMarkerBuildingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 120, 120, true))
+                val biggerMarkerOtherBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 120, 120, true))
                 val markerUnknownBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
                     BitmapFactory.decodeResource(context.resources, R.drawable.unknown_location), 100, 100, true))
                 if (map.markers != null) {
                     for (marker in map.markers) {
                         Marker(
-                            state = MarkerState(position = marker.localisation),
+                            state = MarkerState(marker.localisation),
                             icon = when (marker.type) {
-                                MarkerType.BUILDING -> markerBuildingBitmap
-                                MarkerType.PARKING -> markerParkingBitmap
-                                else -> markerOtherBitmap
+                                MarkerType.BUILDING ->
+                                    if (displayedMarker == marker) biggerMarkerBuildingBitmap else markerBuildingBitmap
+                                MarkerType.PARKING ->
+                                    if (displayedMarker == marker) biggerMarkerParkingBitmap else markerParkingBitmap
+                                else ->
+                                    if (displayedMarker == marker) biggerMarkerOtherBitmap else markerOtherBitmap
                             },
-                            title = marker.markerName,
-                            onInfoWindowClick = {
+                            onClick = {
+                                coroutineScope.launch {
+                                    cameraPositionState.animate(CameraUpdateFactory.newLatLng(marker.localisation), CENTER_MAP_DURATION_IN_MS)
+                                }
                                 selectedLocation.value = null
                                 mapViewModel.switchMarker(marker)
                                 showMarkerInfo = true
+                                true
                             }
                         )
                     }
@@ -215,11 +237,12 @@ fun MapScreen(
                                         modifier = Modifier
                                             .verticalScroll(rememberScrollState())
                                     ) {
-                                        if (displayedMarker.markerDescription != null)
+                                        if (displayedMarker.markerDescription != "" && displayedMarker.markerDescription != null) {
                                             Text(
                                                 text = displayedMarker.markerDescription as String,
                                                 modifier = Modifier.padding(bottom = 10.dp)
                                             )
+                                        }
                                         if (displayedMarker.type == MarkerType.BUILDING) {
                                             var selectedFloor by remember { mutableIntStateOf(170) }
                                             Column(

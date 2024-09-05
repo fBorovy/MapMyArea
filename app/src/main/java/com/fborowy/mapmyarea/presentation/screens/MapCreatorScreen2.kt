@@ -5,21 +5,29 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -42,6 +51,7 @@ import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
 import com.fborowy.mapmyarea.ui.theme.Typography
 import com.fborowy.mapmyarea.ui.theme.onMapButtonBackground
 import com.fborowy.mapmyarea.ui.theme.onMapButtonText
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -50,6 +60,8 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -59,19 +71,21 @@ fun MapCreatorScreen2(
 ) {
 
     val context = LocalContext.current
-    var isNewPointButtonVisible by remember { mutableStateOf(false) }
-    var newMarkerPosition by remember { mutableStateOf<LatLng?>(null) }
-    val markerAddBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-            BitmapFactory.decodeResource(context.resources, R.drawable.marker_add), 100, 100, true))}
-    val markerParkingBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-            BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 100, 100, true))}
-    val markerBuildingBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-            BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 100, 100, true))}
-    val markerOtherBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-        BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 100, 100, true))}
+    val newMapState by mapCreatorViewModel.newMapState.collectAsState()
+    var isNewPointButtonVisible by rememberSaveable { mutableStateOf(false) }
+    val newMarkerState by mapCreatorViewModel.newMarkerState.collectAsState()
+    var selectedMarkerPosition by rememberSaveable { mutableStateOf<LatLng?>(null) }
+    var selectedMarkerTitle by rememberSaveable { mutableStateOf<String?>(null) }
     var isInstructionVisible by rememberSaveable { mutableStateOf(true) }
+    var isRemoveMarkerPopupVisible by rememberSaveable { mutableStateOf(false) }
+    val cameraPositionState = rememberCameraPositionState()
+    val coroutineScope = rememberCoroutineScope()
 
-
+    LaunchedEffect(key1 = newMarkerState) {
+        if (newMarkerState.coordinates != null) {
+            cameraPositionState.animate(CameraUpdateFactory.newLatLng(newMarkerState.coordinates!!), CENTER_MAP_DURATION_IN_MS)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -93,8 +107,12 @@ fun MapCreatorScreen2(
                     .padding(10.dp)
             ) {
                 MMAHeader(
-                    header = stringResource(id = R.string.map_creator_screen_title),
+                    header =  mapCreatorViewModel.originalMapName?: stringResource(id = R.string.map_creator_screen_title),
                     onGoBack = {
+                        if (mapCreatorViewModel.originalMapName != null) {
+                            mapCreatorViewModel.resetNewMapState()
+                            mapCreatorViewModel.resetEditMapState()
+                        }
                         navController.popBackStack()
                     }
                 )
@@ -113,6 +131,42 @@ fun MapCreatorScreen2(
                 //mapToolbarEnabled = false,
             )
 
+            if (cameraPositionState.position.target == selectedMarkerPosition) {
+                Text(
+                    selectedMarkerTitle ?: "AAA",
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .offset(y = 52.dp)
+                        .zIndex(1f)
+                )
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .offset(y = -(15.dp))
+                        .zIndex(1f)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.edit_pencil),
+                        contentDescription = stringResource(id = R.string.edit_marker_icon),
+                        tint = onMapButtonBackground,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clickable {
+                                mapCreatorViewModel.setNewMarkerState(selectedMarkerTitle!!)
+                                navController.navigate(Screen.MarkerConfigurationScreen.route)
+                            }
+                    )
+                    Icon(
+                        painter = painterResource(id = R.drawable.delete_24),
+                        contentDescription = stringResource(id = R.string.delete_marker_icon),
+                        tint = onMapButtonBackground,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clickable { isRemoveMarkerPopupVisible = true }
+                    )
+                }
+            }
+
             GoogleMap(
                 modifier = Modifier
                     .fillMaxSize()
@@ -128,12 +182,21 @@ fun MapCreatorScreen2(
                 uiSettings = mapUiSettings,
                 onMapClick = { position ->
                     mapCreatorViewModel.setNewMarkerCoordinates(position)
-                    newMarkerPosition = position
                     isNewPointButtonVisible = true
                 },
-                contentPadding = PaddingValues(top = 25.dp)
+                contentPadding = PaddingValues(top = 25.dp),
+                cameraPositionState = cameraPositionState,
             ) {
-                newMarkerPosition?.let {
+                val markerAddBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_add), 100, 100, true))}
+                val markerParkingBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 100, 100, true))}
+                val markerBuildingBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 100, 100, true))}
+                val markerOtherBitmap = remember { BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 100, 100, true))}
+
+                newMarkerState.coordinates?.let {
                     Marker(
                         state = MarkerState(position = it),
                         icon = markerAddBitmap,
@@ -143,15 +206,25 @@ fun MapCreatorScreen2(
                         }
                     )
                 }
-                for (marker in mapCreatorViewModel.newMapState.value.markers) {
+                for (marker in newMapState.markers) {
                     Marker(
-                        state = MarkerState(position = marker.localisation),
+                        state = MarkerState(marker.localisation),
                         icon = when (marker.type) {
                             MarkerType.BUILDING -> markerBuildingBitmap
                             MarkerType.PARKING -> markerParkingBitmap
                             else -> markerOtherBitmap
                         },
-                        title = marker.markerName
+                        title = marker.markerName,
+                        onClick = {
+                            coroutineScope.launch {
+                                cameraPositionState.animate(CameraUpdateFactory.newLatLng(marker.localisation), CENTER_MAP_DURATION_IN_MS)
+                            }
+                            selectedMarkerPosition = marker.localisation
+                            selectedMarkerTitle = marker.markerName
+                            isNewPointButtonVisible = false
+                            mapCreatorViewModel.resetNewMarkerState()
+                            true
+                        }
                     )
                 }
             }
@@ -161,7 +234,7 @@ fun MapCreatorScreen2(
                     .padding(bottom = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (isNewPointButtonVisible) {
+                if (newMarkerState.coordinates != null) {
                     MMAButton(text = stringResource(id = R.string.new_building_button_text), onClick = {
                         mapCreatorViewModel.setMarkerType(MarkerType.BUILDING)
                         navController.navigate(Screen.MarkerConfigurationScreen.route) },
@@ -202,5 +275,19 @@ fun MapCreatorScreen2(
                 }
             )
         }
+    }
+    if (isRemoveMarkerPopupVisible) {
+        MMAInstructionPopup(
+            content = stringResource(id = R.string.remove_marker_confitmation),
+            onDismiss = { isRemoveMarkerPopupVisible = false },
+            onDismissLabel = stringResource(id = R.string.cancel),
+            onConfirm = {
+                mapCreatorViewModel.removeMarker(selectedMarkerPosition!!)
+                selectedMarkerTitle = ""
+                selectedMarkerPosition = null
+                isRemoveMarkerPopupVisible = false
+            },
+            onConfirmLabel = stringResource(R.string.confirm)
+        )
     }
 }

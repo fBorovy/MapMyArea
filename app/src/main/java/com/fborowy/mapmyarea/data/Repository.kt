@@ -56,10 +56,10 @@ class Repository (
             throw e
         }
     }
-    suspend fun addNewMap(map: MapData): SavingMapState {
+    suspend fun addEditMap(map: MapData, isMapEdited: Boolean): SavingMapState {
         val docRef = database.collection("maps").document(map.mapName!!)
         val mapDocument = docRef.get().await()
-        if (mapDocument.exists()) {
+        if (mapDocument.exists() && !isMapEdited) {
             return SavingMapState(false, "exists")
         }
 

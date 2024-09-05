@@ -22,6 +22,7 @@ fun MMATextField(
     onValueChange: (String) -> Unit,
     placeholder: @Composable () -> Unit,
     isHidden: Boolean,
+    enabled: Boolean = true
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -52,6 +53,7 @@ fun MMATextField(
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done
-        )
+        ),
+        enabled = enabled
     )
 }

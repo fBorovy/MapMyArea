@@ -52,8 +52,8 @@ import kotlinx.coroutines.launch
 fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navController: NavController) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    var markerName by rememberSaveable { mutableStateOf("") }
-    var markerDescription by rememberSaveable { mutableStateOf("") }
+    var markerName by rememberSaveable { mutableStateOf(mapCreatorViewModel.newMarkerState.value.markerName?: "") }
+    var markerDescription by rememberSaveable { mutableStateOf(mapCreatorViewModel.newMarkerState.value.markerDescription?: "") }
     val context = LocalContext.current
 
     val maxFloorAmount = 163
@@ -75,6 +75,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
         Toast.LENGTH_LONG
     )
     val floorsListScrollState = rememberScrollState()
+    val errorCode by mapCreatorViewModel.markerConfigurationErrorCode.collectAsState()
 
     Column(
         modifier = Modifier
@@ -247,9 +248,10 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
             onClick = {
                 if (markerName.length > 2) {
                     mapCreatorViewModel.setMarkerNameDescription(markerName, markerDescription)
-                    mapCreatorViewModel.addNewMarkerToMap()
-                    mapCreatorViewModel.resetNewMarkerState()
-                    navController.popBackStack()
+                    val succeed = mapCreatorViewModel.addEditMarker()
+                    if (succeed) {
+                        navController.popBackStack()
+                    }
                 } else {
                     Toast.makeText(
                         context,
@@ -260,5 +262,13 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
             }
         )
         Spacer(modifier = Modifier.height(20.dp))
+    }
+    if (errorCode != null) {
+        Toast.makeText(
+            context,
+            stringResource(id = errorCode!!),
+            Toast.LENGTH_LONG
+        ).show()
+        mapCreatorViewModel.resetMarkerErrorCode()
     }
 }

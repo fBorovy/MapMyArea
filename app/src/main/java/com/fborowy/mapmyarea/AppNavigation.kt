@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -59,13 +62,15 @@ fun AppNavigation(
         )
     }
     val navController = rememberNavController()
-
+    var logged by remember { mutableStateOf(false) }
 
     NavHost(navController = navController, startDestination = Screen.StartScreen.route) {
         composable(Screen.StartScreen.route) {
             LaunchedEffect(key1 = Unit) {
-                if (appViewModel.checkIfLogged())
+                if (appViewModel.checkIfLogged()) {
+                    logged = true
                     navController.navigate(Screen.HomeScreen.route)
+                }
             }
             val launcher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartIntentSenderForResult(),
@@ -82,14 +87,14 @@ fun AppNavigation(
             )
 
             LaunchedEffect(key1 = signInState.signInSuccessful){
-                if (signInState.signInSuccessful){
+                if (signInState.signInSuccessful == true){
                     appViewModel.addUserDataToFirestoreIfItsNotThere()
-
                     Toast.makeText(
                         applicationContext,
                         applicationContext.resources.getString(R.string.toast_sign_in),
                         Toast.LENGTH_LONG
                     ).show()
+                    logged = true
                     navController.navigate(Screen.HomeScreen.route)
                     appViewModel.resetSignInState()
                 }
@@ -114,7 +119,7 @@ fun AppNavigation(
         composable(route = Screen.HomeScreen.route){
             val locationPermissionViewModel = viewModel<LocationPermissionViewModel>()
             val permissionDialogVisible by locationPermissionViewModel.shouldDialogBeVisible.collectAsState()
-            val locationPermissionsLauncher =  rememberLauncherForActivityResult(
+            val locationPermissionsLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions(),
                 onResult = { permissions ->
                     val areGranted = permissions.values.reduce { accumulator, permission ->
@@ -143,9 +148,12 @@ fun AppNavigation(
                     }
                 )
             }
-            LaunchedEffect(key1 = Unit) {
-                appViewModel.viewModelScope.launch {
-                    appViewModel.getSignedUserInfo()
+            LaunchedEffect(Unit) {
+                if (logged) {
+                    appViewModel.viewModelScope.launch {
+                        appViewModel.getSignedUserInfo()
+                    }
+                    logged = false
                 }
             }
 
@@ -170,6 +178,7 @@ fun AppNavigation(
                         ).show()
                         navController.popBackStack(Screen.StartScreen.route, false)
                     }
+                    appViewModel.resetSignInState()
                 },
                 onOpenMap = {
                     appViewModel.switchDisplayedMap(it)
@@ -181,6 +190,16 @@ fun AppNavigation(
                         launcher = locationPermissionsLauncher
                     )
                 },
+                onEditMap = { map ->
+                    mapCreatorViewModel.setEditMapState(map)
+                    locationPermissionViewModel.checkAndRequestPermissions(
+                        context = applicationContext,
+                        navController = navController,
+                        screen = Screen.MapCreatorScreen2.route,
+                        permissions = locationPermissionViewModel.locationPermissions,
+                        launcher = locationPermissionsLauncher
+                    )
+                }
             )
         }
         composable(route = Screen.MapScreen.route) {
@@ -193,15 +212,24 @@ fun AppNavigation(
 
         composable(route = Screen.EmailSignUpScreen.route){
             LaunchedEffect(key1 = signInState.signInSuccessful){
-                if (signInState.signInSuccessful) {
+                if (signInState.signInSuccessful == true) {
                     Toast.makeText(
                         applicationContext,
                         applicationContext.resources.getString(R.string.toast_sign_up),
                         Toast.LENGTH_LONG
                     ).show()
+                    logged = true
                     navController.navigate(Screen.HomeScreen.route)
                     appViewModel.resetSignInState()
                 }
+                if (signInState.signInSuccessful == false){
+                    Toast.makeText(
+                        applicationContext,
+                        applicationContext.resources.getString(R.string.failed_to_sign_up),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                appViewModel.resetSignInState()
             }
 
             EmailSignUpScreen(
@@ -215,15 +243,24 @@ fun AppNavigation(
 
         composable(route = Screen.EmailSignInScreen.route){
             LaunchedEffect(key1 = signInState.signInSuccessful){
-                if (signInState.signInSuccessful) {
+                if (signInState.signInSuccessful == true) {
                     Toast.makeText(
                         applicationContext,
                         applicationContext.resources.getString(R.string.toast_sign_in),
                         Toast.LENGTH_LONG
                     ).show()
+                    logged = true
                     navController.navigate(Screen.HomeScreen.route)
                     appViewModel.resetSignInState()
                 }
+                if (signInState.signInSuccessful == false){
+                    Toast.makeText(
+                        applicationContext,
+                        applicationContext.resources.getString(R.string.failed_to_sign_in),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                appViewModel.resetSignInState()
             }
 
             EmailSignInScreen(
@@ -248,6 +285,10 @@ fun AppNavigation(
             MapCreatorScreen3(
                 mapCreatorViewModel,
                 navController,
+                onMapCreated = {
+                    mapCreatorViewModel.originalMapName = null
+                    appViewModel.addMapToUserSavedMaps(it)
+                }
             )
         }
 

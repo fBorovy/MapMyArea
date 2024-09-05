@@ -26,8 +26,9 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 const val MIN_MAP_NAME_LENGTH = 3
+const val MAX_MAP_DIAGONAL_LENGTH = 3.0
 val FORBIDDEN_MAP_NAME_CHARACTERS = listOf('/', '*', '[', ']', '{', '}', '#', '%', '?')
-@Suppress("SameParameterValue")
+
 class MapCreatorViewModel: ViewModel() {
 
     private val repository: Repository = Repository()
@@ -47,7 +48,12 @@ class MapCreatorViewModel: ViewModel() {
     var errorMessage: Int = 0
     var isInstructionScreen1Visible = true
     var isInstructionScreen2Visible = true
-
+    var originalMapName: String? = null
+    private val maxMapNameLength = 40
+    private val maxMapDescriptionLength = 150
+    private var _markerConfigurationErrorCode = MutableStateFlow<Int?>(null)
+    val markerConfigurationErrorCode: StateFlow<Int?> = _markerConfigurationErrorCode
+    private var originalMarkerName: String? = null
     fun addFloor(onTop: Boolean) {
         if (onTop) {
             _newMarkerState.update { it.copy(
@@ -130,23 +136,12 @@ class MapCreatorViewModel: ViewModel() {
         }
     }
 
-    fun saveNewMap() {
+    fun saveMap(map: MapData) {
         viewModelScope.launch {
             try {
-                _savingMapState.value = repository.addNewMap(
-                    MapData(
-                        mapName = _newMapState.value.name,
-                        mapDescription = _newMapState.value.description,
-                        northEastBound = GeoPoint(
-                            _newMapState.value.bounds!!.northeast.latitude,
-                            _newMapState.value.bounds!!.northeast.longitude
-                        ),
-                        southWestBound = GeoPoint(
-                            _newMapState.value.bounds!!.southwest.latitude,
-                            _newMapState.value.bounds!!.southwest.longitude
-                        ),
-                        markers = _newMapState.value.markers
-                    )
+                _savingMapState.value = repository.addEditMap(
+                    map,
+                    isMapEdited = (originalMapName != null)
                 )
             } catch (e: Exception) {
                 throw e
@@ -154,12 +149,36 @@ class MapCreatorViewModel: ViewModel() {
         }
     }
 
+    fun getMapDataFromMapState(): MapData {
+        return MapData(
+            mapName = _newMapState.value.name,
+            mapDescription = _newMapState.value.description,
+            northEastBound = GeoPoint(
+                _newMapState.value.bounds!!.northeast.latitude,
+                _newMapState.value.bounds!!.northeast.longitude
+            ),
+            southWestBound = GeoPoint(
+                _newMapState.value.bounds!!.southwest.latitude,
+                _newMapState.value.bounds!!.southwest.longitude
+            ),
+            markers = _newMapState.value.markers
+        )
+    }
     fun setNewMapName(name: String) {
-        _newMapState.value = _newMapState.value.copy(name = name)
+        if (name.length <= maxMapNameLength) {
+            _newMapState.value = _newMapState.value.copy(name = name)
+        } else {
+            _newMapState.value = _newMapState.value.copy(name = name.take(maxMapNameLength))
+        }
     }
 
     fun setNewMapDescription(description: String) {
-        _newMapState.value = _newMapState.value.copy(description = description)
+        if (description.length <= maxMapDescriptionLength) {
+            _newMapState.value = _newMapState.value.copy(description = description)
+        } else {
+            _newMapState.value = _newMapState.value.copy(description = description.take(maxMapDescriptionLength))
+        }
+
     }
 
 
@@ -183,7 +202,7 @@ class MapCreatorViewModel: ViewModel() {
     }
     fun setBoundaries(): Int {
         if (_corner1position.value != null && _corner2position.value != null) {
-            if (isAreaWithinLimit(3.0, _corner1position.value, _corner2position.value)) {
+            if (isAreaWithinLimit(_corner1position.value, _corner2position.value)) {
                 val boundSW = LatLng(
                     minOf(_corner1position.value!!.latitude, _corner2position.value!!.latitude),
                     minOf(_corner1position.value!!.longitude, _corner2position.value!!.longitude)
@@ -210,13 +229,13 @@ class MapCreatorViewModel: ViewModel() {
         return _newMapState.value.bounds
     }
 
-    private fun isAreaWithinLimit(maxDiagonalLengthInKilometers: Double, corner1: LatLng?, corner2: LatLng?): Boolean {
+    private fun isAreaWithinLimit(corner1: LatLng?, corner2: LatLng?): Boolean {
         if (corner1 == null || corner2 == null) return false
         val distance = calculateDistance(
             corner1.latitude, corner1.longitude,
             corner2.latitude, corner2.longitude
         )
-        return distance < maxDiagonalLengthInKilometers
+        return distance < MAX_MAP_DIAGONAL_LENGTH
     }
 
     //funkcja korzystająca ze wzoru Haversine'a do obliczenia odległości między dwoma punktami na kuli ziemskiej
@@ -239,7 +258,7 @@ class MapCreatorViewModel: ViewModel() {
 
     fun resetNewMapState() {
         resetCorners()
-        _newMapState.value.bounds = null
+        _newMapState.update { NewMapState() }
     }
 
     fun setMarkerNameDescription(markerName: String, markerDescription: String) {
@@ -259,23 +278,6 @@ class MapCreatorViewModel: ViewModel() {
         }
     }
 
-    fun addNewMarkerToMap() {
-        _newMapState.update {it.copy(
-                markers = it.markers.plus(
-                    MarkerData(
-                    localisation = _newMarkerState.value.coordinates!!,
-                    markerName = _newMarkerState.value.markerName,
-                    markerDescription = _newMarkerState.value.markerDescription,
-                    photos = "",
-                    type = _newMarkerState.value.type!!,
-                    floors = _newMarkerState.value.floors
-                )
-                )
-            )
-        }
-        resetNewMarkerState()
-    }
-
     fun getMarkerType(): MarkerType {
         return _newMarkerState.value.type!!
     }
@@ -288,6 +290,7 @@ class MapCreatorViewModel: ViewModel() {
             photos = "",
             floors = listOf(FloorData(level = 0, rooms = emptyList())),
         )
+        originalMarkerName = null
     }
 
     fun resetSavingMapState() {
@@ -314,6 +317,89 @@ class MapCreatorViewModel: ViewModel() {
             errorMessage = R.string.double_dot_map_name_error_message
             return false
         }
+        return true
+    }
+
+    fun setEditMapState(map: MapData) {
+        _newMapState.update {
+            NewMapState(
+                bounds = LatLngBounds(geoPointToLatLng(map.southWestBound!!), geoPointToLatLng(map.northEastBound!!)),
+                name = map.mapName!!,
+                description = map.mapDescription,
+                markers = map.markers?: emptyList()
+            )
+        }
+        originalMapName = map.mapName
+    }
+
+    fun resetEditMapState() {
+        originalMapName = null
+    }
+
+    private fun geoPointToLatLng(geoPoint: GeoPoint): LatLng {
+        return LatLng(geoPoint.latitude, geoPoint.longitude)
+    }
+
+    fun removeMarker(selectedMarkerPosition: LatLng) {
+        for (marker in _newMapState.value.markers) {
+            if (marker.localisation == selectedMarkerPosition) {
+                _newMapState.update { it.copy(
+                    markers = it.markers.minus(marker)
+                ) }
+            }
+        }
+    }
+
+    fun setNewMarkerState(markerName: String) {
+        for (marker in _newMapState.value.markers) {
+            if (marker.markerName == markerName)
+            _newMarkerState.update {
+                NewMarkerState(
+                    marker.localisation,
+                    marker.markerName,
+                    marker.markerDescription,
+                    marker.type,
+                    "",
+                    marker.floors,
+                )
+            }
+        }
+        originalMarkerName = markerName
+    }
+
+    fun resetMarkerErrorCode() {
+        _markerConfigurationErrorCode.update { null }
+    }
+
+    fun addEditMarker(): Boolean {
+        var markerToChange: MarkerData? = null
+        for (marker in _newMapState.value.markers) {
+            if (marker.markerName == _newMarkerState.value.markerName && _newMarkerState.value.markerName != originalMarkerName) {
+                // found other marker with provided name
+                _markerConfigurationErrorCode.update { R.string.marker_name_in_use }
+                return false
+            }
+            if (marker.markerName == originalMarkerName) {
+                markerToChange = marker
+                if (originalMarkerName == _newMarkerState.value.markerName) {
+                    break // there was na name change so no need to seek if the name is already in use
+                }
+            }
+        }
+        if (markerToChange != null) {
+            _newMapState.update { it.copy( markers = it.markers.minus(markerToChange)) }
+        }
+        _newMapState.update { it.copy(
+            markers = it.markers.plus(MarkerData(
+                markerName = _newMarkerState.value.markerName,
+                markerDescription = _newMarkerState.value.markerDescription,
+                type = _newMarkerState.value.type!!,
+                localisation = _newMarkerState.value.coordinates!!,
+                photos = "",
+                floors = _newMarkerState.value.floors
+            ))
+        ) }
+        resetNewMarkerState()
         return true
     }
 }
