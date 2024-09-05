@@ -1,6 +1,5 @@
 package com.fborowy.mapmyarea.domain.view_models
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.fborowy.mapmyarea.data.classes.MarkerData
 import com.fborowy.mapmyarea.domain.MarkerType
@@ -15,7 +14,6 @@ class MapViewModel: ViewModel() {
     val currentMarkerInfo: StateFlow<MarkerData> = _currentMarkerInfo
 
     fun switchMarker(marker: MarkerData) {
-        Log.d("VM XDD", "${marker.markerName}")
         _currentMarkerInfo.update { it.copy(
             markerName = marker.markerName,
             markerDescription = marker.markerDescription,
@@ -25,5 +23,10 @@ class MapViewModel: ViewModel() {
         ) }
     }
 
+    fun resetMarker() {
+        _currentMarkerInfo.update {
+            MarkerData(null, null, MarkerType.OTHER, LatLng(0.0,0.0))
+        }
+    }
 
 }

@@ -127,7 +127,10 @@ fun MapScreen(
                 uiSettings = mapUiSettings,
                 onMapClick = {
                     selectedLocation.value = null
-                    if (showMarkerInfo) showMarkerInfo = false
+                    if (showMarkerInfo) {
+                        mapViewModel.resetMarker()
+                        showMarkerInfo = false
+                    }
                 },
                 onMapLongClick = {
                     selectedLocation.value = it
