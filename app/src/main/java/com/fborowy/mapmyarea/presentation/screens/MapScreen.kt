@@ -121,7 +121,7 @@ fun MapScreen(
                         LatLng(map.northEastBound!!.latitude, map.northEastBound.longitude)
                     ),
                     minZoomPreference = 17f,
-                    maxZoomPreference = 17f,
+                    maxZoomPreference = 19f,
                 ), //app must have a localisation permission first in order to enable it
                 onMyLocationButtonClick = { false },
                 uiSettings = mapUiSettings,
@@ -222,6 +222,7 @@ fun MapScreen(
                                             .clip(RoundedCornerShape(15.dp))
                                             .background(MaterialTheme.colorScheme.secondary)
                                             .clickable {
+
                                                 //TODO
                                             },
                                         contentAlignment = Alignment.Center

@@ -46,7 +46,6 @@ class Repository (
                         }
                     }
                 }
-
                 UserData(
                     userId = auth.currentUser!!.email!!,
                     username = trimEmail(auth.currentUser!!.email!!),

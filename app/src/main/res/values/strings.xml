@@ -64,7 +64,7 @@
     <string name="floors">Floors:</string>
     <string name="delete_description">Delete</string>
     <string name="rooms">Rooms</string>
-    <string name="ok">Ok!</string>
+    <string name="ok" translatable="false">Ok!</string>
     <string name="set_map_points_instruction_popup">Click on the map to add points of interest.</string>
     <string name="new_point">New %s</string>
     <string name="map_saved_popup">Your map has been saved! Other users can find it by it\'s name!</string>
@@ -79,22 +79,22 @@
     <string name="map_name_shorter_than_3_error_message">Map name can\'t be shorter than 3 characters</string>
     <string name="map_name_invalid_characters_error_message">Map name contains invalid characters</string>
     <string name="double_dot_map_name_error_message">Map name can\'t contain double dots (..)</string>
-    <string name="map_with_entered_name_already_exists">Map with entered name already exists.</string>
+    <string name="map_with_entered_name_already_exists">Map with entered name already exists</string>
     <string name="marker_name_shorter_than_3">Point name must consist of at least 3 characters</string>
     <string name="room_name_too_short">Room name must consist of at least 3 characters</string>
     <string name="user_already_exists">Username already in use</string>
     <string name="not_found">Not found</string>
     <string name="navigate">Navigate</string>
     <string name="place_on_the_map">Place on the map</string>
-    <string name="search_map">Search map</string>
-    <string name="add_map">Add map</string>
+    <string name="search_map">Map name</string>
+    <string name="add_map">Add</string>
     <string name="map_not_found">Map with provided name not found</string>
     <string name="unknown_error">Unknown error occured</string>
     <string name="you_have_added_this_map_already">You have saved this map already, check saved maps section</string>
     <string name="search_map_instruction">Ask for map name from it\'s author</string>
     <string name="assure_saved_map_removal">Remove map from saved maps?\n You can add it back anytime.</string>
     <string name="assure_own_map_deletion">Delete the map?\n All users will loose access to it.\n This operation cannot be undone.</string>
-    <string name="map_not_deleted">Couldn\'t delete map. Check your internet connection or try later.</string>
+    <string name="map_not_deleted">Couldn\'t delete map. Check your internet connection or try again later.</string>
     <string name="error_getting_user_info">Couldn\'t load user info. Try again later.</string>
     <string name="unknown_registering_user_error">Couldn\'t create user, try again later.</string>
     <string name="edit_map_icon">Edit map</string>
