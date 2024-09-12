@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +34,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.data.classes.MapData
@@ -140,41 +142,50 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(start = 3.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = "${map.mapName}",
-                                style = Typography.bodyMedium,
-                                modifier = Modifier.clickable {
-                                    appViewModel.clearSearchText()
-                                    onOpenMap(map)
-                                }
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                            Icon(
-                                painter = painterResource(id = R.drawable.edit_pencil),
-                                contentDescription = stringResource(id = R.string.edit_map_icon),
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .padding(top = 4.dp)
-                                    .clickable {
+                            Box(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "${map.mapName}",
+                                    style = Typography.bodyMedium,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.clickable {
                                         appViewModel.clearSearchText()
-                                        onEditMap(map)
+                                        onOpenMap(map)
                                     }
-                            )
-                            Icon(
-                                painter = painterResource(id = R.drawable.delete_24),
-                                contentDescription = stringResource(id = R.string.delete_description),
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .padding(top = 4.dp)
-                                    .clickable {
-                                        keyboardController?.hide()
-                                        focusManager.clearFocus()
-                                        mapToDeleteName = map.mapName!!
-                                        showOwnMapDeletionConfirmationDialog = true
-                                    }
-                            )
+                                )
+                            }
+                            Row {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.edit_pencil),
+                                    contentDescription = stringResource(id = R.string.edit_map_icon),
+                                    modifier = Modifier
+                                        .alignByBaseline()
+                                        .size(28.dp)
+                                        .padding(top = 4.dp)
+                                        .clickable {
+                                            appViewModel.clearSearchText()
+                                            onEditMap(map)
+                                        }
+                                )
+                                Icon(
+                                    painter = painterResource(id = R.drawable.delete_24),
+                                    contentDescription = stringResource(id = R.string.delete_description),
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .padding(top = 4.dp)
+                                        .clickable {
+                                            keyboardController?.hide()
+                                            focusManager.clearFocus()
+                                            mapToDeleteName = map.mapName!!
+                                            showOwnMapDeletionConfirmationDialog = true
+                                        }
+                                )
+                            }
                         }
                     }
                 }
@@ -229,15 +240,18 @@ fun HomeScreen(
                             .padding(start = 3.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "${map.mapName}",
-                            style = Typography.bodyMedium,
-                            modifier = Modifier.clickable {
-                                appViewModel.clearSearchText()
-                                onOpenMap(map)
-                            }
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
+                        Box(
+                            modifier = Modifier.weight(1f).padding(end = 5.dp)
+                        ) {
+                            Text(
+                                text = "${map.mapName}",
+                                style = Typography.bodyMedium,
+                                modifier = Modifier.clickable {
+                                    appViewModel.clearSearchText()
+                                    onOpenMap(map)
+                                }
+                            )
+                        }
                         Icon(
                             painter = painterResource(id = R.drawable.delete_24),
                             contentDescription = stringResource(id = R.string.delete_description),
