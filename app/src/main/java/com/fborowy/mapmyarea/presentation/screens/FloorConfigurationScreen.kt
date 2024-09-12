@@ -26,9 +26,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,10 +53,13 @@ fun FloorConfigurationScreen(
 
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager: FocusManager = LocalFocusManager.current
     val floor by mapCreatorViewModel.newFloorState.collectAsState()
     val rooms = floor.rooms
     var roomName by rememberSaveable { mutableStateOf("") }
     var roomDescription by rememberSaveable { mutableStateOf("") }
+    val maxRoomNameLength = 40
+    val maxRoomDescriptionLength = 150
 
     Column(
         modifier = Modifier
@@ -62,6 +67,7 @@ fun FloorConfigurationScreen(
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     keyboardController?.hide()
+                    focusManager.clearFocus()
                 })
             }
             .background(MaterialTheme.colorScheme.background)
@@ -85,15 +91,20 @@ fun FloorConfigurationScreen(
             ) {
                 MMATextField(
                     value = roomName,
-                    onValueChange = { roomName = it },
-                    placeholder = { Text(text = stringResource(id = R.string.enter_room_name)) },
+                    onValueChange = {
+                        roomName = if (it.length <= maxRoomNameLength) it
+                        else it.take(maxRoomNameLength)
+                    },
+                    placeholder = stringResource(id = R.string.enter_room_name),
                     isHidden = false
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 MMATextField(
                     value = roomDescription,
-                    onValueChange = { roomDescription = it },
-                    placeholder = { Text(text = stringResource(id = R.string.enter_room_description)) },
+                    onValueChange = {
+                        roomDescription = if (it.length <= maxRoomDescriptionLength) it
+                        else it.take(maxRoomDescriptionLength)},
+                    placeholder = stringResource(id = R.string.enter_room_description),
                     isHidden = false
                 )
             }
@@ -106,6 +117,9 @@ fun FloorConfigurationScreen(
                     mapCreatorViewModel.addRoomToFloor(RoomData(name = roomName, description = roomDescription))
                     roomName = ""
                     roomDescription = ""
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+
                 } else {
                     Toast.makeText(
                         context,

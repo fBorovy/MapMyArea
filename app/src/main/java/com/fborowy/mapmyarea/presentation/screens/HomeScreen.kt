@@ -101,7 +101,7 @@ fun HomeScreen(
             Text(
                 modifier = Modifier.weight(1f),
                 text = userData.username ?: context.getString(R.string.user),
-                style = Typography.titleMedium,
+                style = Typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
@@ -131,7 +131,7 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = context.getString(R.string.own_maps),
-                        style = Typography.bodyMedium,
+                        style = Typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                     Spacer(modifier = Modifier.height(5.dp))
@@ -144,6 +144,7 @@ fun HomeScreen(
                         ) {
                             Text(
                                 text = "${map.mapName}",
+                                style = Typography.bodyMedium,
                                 modifier = Modifier.clickable {
                                     appViewModel.clearSearchText()
                                     onOpenMap(map)
@@ -154,7 +155,7 @@ fun HomeScreen(
                                 painter = painterResource(id = R.drawable.edit_pencil),
                                 contentDescription = stringResource(id = R.string.edit_map_icon),
                                 modifier = Modifier
-                                    .size(30.dp)
+                                    .size(28.dp)
                                     .padding(top = 4.dp)
                                     .clickable {
                                         appViewModel.clearSearchText()
@@ -165,7 +166,7 @@ fun HomeScreen(
                                 painter = painterResource(id = R.drawable.delete_24),
                                 contentDescription = stringResource(id = R.string.delete_description),
                                 modifier = Modifier
-                                    .size(30.dp)
+                                    .size(28.dp)
                                     .padding(top = 4.dp)
                                     .clickable {
                                         keyboardController?.hide()
@@ -187,7 +188,7 @@ fun HomeScreen(
                 MMATextField(
                     value = searchText,
                     onValueChange = { appViewModel.updateSearchMapText(it) },
-                    placeholder = { Text(text = stringResource(id = R.string.search_map)) },
+                    placeholder = stringResource(id = R.string.search_map),
                     isHidden = false
                 )
                 Spacer(modifier = Modifier.height(7.dp))
@@ -217,7 +218,7 @@ fun HomeScreen(
             ) {
                 Text(
                     text = context.getString(R.string.user_maps),
-                    style = Typography.bodyMedium,
+                    style = Typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
                 Spacer(modifier = Modifier.height(5.dp))
@@ -230,6 +231,7 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = "${map.mapName}",
+                            style = Typography.bodyMedium,
                             modifier = Modifier.clickable {
                                 appViewModel.clearSearchText()
                                 onOpenMap(map)
@@ -240,7 +242,7 @@ fun HomeScreen(
                             painter = painterResource(id = R.drawable.delete_24),
                             contentDescription = stringResource(id = R.string.delete_description),
                             modifier = Modifier
-                                .size(30.dp)
+                                .size(28.dp)
                                 .padding(top = 4.dp)
                                 .clickable {
                                     keyboardController?.hide()

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -78,7 +77,7 @@ fun EmailSignUpScreen(
                             registrationViewModel.updateEmailField(it.take(maxUsernameLength))
                         }
                                     },
-                    placeholder = { Text( text = stringResource(R.string.enter_email)) },
+                    placeholder = stringResource(R.string.enter_email),
                     isHidden = false,
                 )
                 Spacer(modifier = Modifier.height(30.dp))
@@ -90,7 +89,7 @@ fun EmailSignUpScreen(
                         } else {
                             registrationViewModel.updatePassword1Field(it.take(maxPasswordLength))
                         }},
-                    placeholder = { Text(text = stringResource(R.string.enter_password)) },
+                    placeholder = stringResource(R.string.enter_password),
                     isHidden = true,
                 )
                 Spacer(modifier = Modifier.height(15.dp))
@@ -102,7 +101,7 @@ fun EmailSignUpScreen(
                         } else {
                             registrationViewModel.updatePassword2Field(it.take(maxPasswordLength))
                         }},
-                    placeholder = { Text( text = stringResource(R.string.confirm_password)) },
+                    placeholder = stringResource(R.string.confirm_password),
                     isHidden = true,
                 )
                 Spacer(modifier = Modifier.height(50.dp))

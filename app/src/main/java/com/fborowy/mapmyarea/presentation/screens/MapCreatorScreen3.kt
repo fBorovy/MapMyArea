@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -71,7 +70,7 @@ fun MapCreatorScreen3(
                 MMATextField(
                     value = mapName,
                     onValueChange = { mapCreatorViewModel.setNewMapName(it) },
-                    placeholder = { Text(text = stringResource(id = R.string.map_name)) },
+                    placeholder = stringResource(id = R.string.map_name),
                     isHidden = false,
                     enabled = mapCreatorViewModel.originalMapName == null,
                 )
@@ -79,7 +78,7 @@ fun MapCreatorScreen3(
                 MMATextField(
                     value = mapDescription,
                     onValueChange = { mapCreatorViewModel.setNewMapDescription(it) },
-                    placeholder = { Text(text = stringResource(id = R.string.map_description)) },
+                    placeholder = stringResource(id = R.string.map_description),
                     isHidden = false,
                 )
             }

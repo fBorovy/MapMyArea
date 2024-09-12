@@ -51,6 +51,7 @@ import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
 import com.fborowy.mapmyarea.ui.theme.Typography
 import com.fborowy.mapmyarea.ui.theme.onMapButtonBackground
 import com.fborowy.mapmyarea.ui.theme.onMapButtonText
+import com.fborowy.mapmyarea.ui.theme.onMapText
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -120,7 +121,7 @@ fun MapCreatorScreen2(
                 Text(
                     stringResource(id = R.string.set_map_points_instruction),
                     style = Typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = onMapButtonBackground.copy(alpha = 0.75f),
                     modifier = Modifier.padding(start = 5.dp, bottom = 5.dp)
                 )
             }
@@ -133,7 +134,9 @@ fun MapCreatorScreen2(
 
             if (cameraPositionState.position.target == selectedMarkerPosition) {
                 Text(
-                    selectedMarkerTitle ?: "AAA",
+                    selectedMarkerTitle ?: " ",
+                    style = Typography.bodyMedium,
+                    color = onMapText,
                     modifier = Modifier
                         .align(Alignment.Center)
                         .offset(y = 52.dp)
@@ -142,13 +145,13 @@ fun MapCreatorScreen2(
                 Row(
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .offset(y = -(15.dp))
+                        .offset(y = -(10.dp))
                         .zIndex(1f)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.edit_pencil),
                         contentDescription = stringResource(id = R.string.edit_marker_icon),
-                        tint = onMapButtonBackground,
+                        tint = onMapText,
                         modifier = Modifier
                             .size(30.dp)
                             .clickable {
@@ -159,7 +162,7 @@ fun MapCreatorScreen2(
                     Icon(
                         painter = painterResource(id = R.drawable.delete_24),
                         contentDescription = stringResource(id = R.string.delete_marker_icon),
-                        tint = onMapButtonBackground,
+                        tint = onMapText,
                         modifier = Modifier
                             .size(30.dp)
                             .clickable { isRemoveMarkerPopupVisible = true }

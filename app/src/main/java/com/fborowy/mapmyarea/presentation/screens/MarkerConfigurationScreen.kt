@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +46,7 @@ import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
 import com.fborowy.mapmyarea.presentation.components.MMAHeader
 import com.fborowy.mapmyarea.presentation.components.MMATextField
+import com.fborowy.mapmyarea.ui.theme.Typography
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -52,6 +54,7 @@ import kotlinx.coroutines.launch
 fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navController: NavController) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     var markerName by rememberSaveable { mutableStateOf(mapCreatorViewModel.newMarkerState.value.markerName?: "") }
     var markerDescription by rememberSaveable { mutableStateOf(mapCreatorViewModel.newMarkerState.value.markerDescription?: "") }
     val context = LocalContext.current
@@ -76,6 +79,8 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
     )
     val floorsListScrollState = rememberScrollState()
     val errorCode by mapCreatorViewModel.markerConfigurationErrorCode.collectAsState()
+    val maxMarkerNameLength = 40
+    val maxMarkerDescriptionLength = 150
 
     Column(
         modifier = Modifier
@@ -83,6 +88,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     keyboardController?.hide()
+                    focusManager.clearFocus()
                 })
             }
             .background(MaterialTheme.colorScheme.background)
@@ -107,15 +113,21 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
             ) {
                 MMATextField(
                     value = markerName,
-                    onValueChange = { markerName = it },
-                    placeholder = { Text(text = stringResource(id = R.string.enter_marker_name)) },
+                    onValueChange = {
+                        markerName = if (it.length > maxMarkerNameLength) it.take(maxMarkerNameLength)
+                        else it
+                                    },
+                    placeholder = stringResource(id = R.string.enter_marker_name),
                     isHidden = false
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 MMATextField(
                     value = markerDescription,
-                    onValueChange = { markerDescription = it },
-                    placeholder = { Text(text = stringResource(id = R.string.enter_marker_description)) },
+                    onValueChange = {
+                        markerDescription = if (it.length > maxMarkerDescriptionLength) it.take(maxMarkerDescriptionLength)
+                        else it
+                                    },
+                    placeholder = stringResource(id = R.string.enter_marker_description),
                     isHidden = false
                 )
             }
@@ -145,6 +157,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
                         ) {
                             Text(
                                 text = stringResource(id = R.string.remove_first_floor),
+                                style = Typography.bodySmall,
                                 textAlign = TextAlign.Center,
                                 color = if (areRemoveFloorButtonsActive) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onTertiary
                             )
@@ -156,6 +169,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
                         ) {
                             Text(
                                 stringResource(id = R.string.add_lower_floor),
+                                style = Typography.bodySmall,
                                 modifier = Modifier
                                     .clickable {
                                         if (areAddFloorButtonsActive) {
@@ -187,6 +201,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
                                     floorsList.forEach { floor ->
                                         Text(
                                             text = stringResource(id = R.string.floor) + " " + floor.level,
+                                            style = Typography.bodySmall,
                                             modifier = Modifier
                                                 .clickable {
                                                     mapCreatorViewModel.shiftSelectedFloor(floor.level)
@@ -201,6 +216,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
                             }
                             Text(
                                 text = stringResource(id = R.string.add_higher_floor),
+                                style = Typography.bodySmall,
                                 modifier = Modifier
                                     .clickable {
                                         if (areAddFloorButtonsActive) {
@@ -235,6 +251,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
                         ) {
                             Text(
                                 text = stringResource(id = R.string.remove_last_floor),
+                                style = Typography.bodySmall,
                                 textAlign = TextAlign.Center,
                                 color = if (areRemoveFloorButtonsActive) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onTertiary
                             )

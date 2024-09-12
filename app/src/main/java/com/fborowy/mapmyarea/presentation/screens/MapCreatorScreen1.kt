@@ -168,7 +168,7 @@ fun MapCreatorScreen1(
                             2 -> mapOversizeToast.show()
                         }
                     },
-                    backgroundColor = onMapButtonBackground,
+                    backgroundColor = onMapButtonBackground.copy(alpha = 0.75f),
                     textColor = onMapButtonText
                 )
             }

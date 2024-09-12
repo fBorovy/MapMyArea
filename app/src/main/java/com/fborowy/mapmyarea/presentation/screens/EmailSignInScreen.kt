@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -78,7 +77,7 @@ fun EmailSignInScreen(
                             it.take(maxUsernameLength)
                         }
                     },
-                    placeholder = { Text(text = stringResource(R.string.enter_email)) },
+                    placeholder = stringResource(R.string.enter_email),
                     isHidden = false,
                 )
                 Spacer(modifier = Modifier.height(15.dp))
@@ -90,7 +89,7 @@ fun EmailSignInScreen(
                         } else {
                             password = it.take(maxPasswordLength)
                         }},
-                    placeholder = { Text(text = stringResource(R.string.enter_password)) },
+                    placeholder = stringResource(R.string.enter_password),
                     isHidden = true,
                 )
                 Spacer(modifier = Modifier.height(25.dp))

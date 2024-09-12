@@ -18,4 +18,5 @@ val TextFieldGray = Color(0xFF898989)
 val InstructionPopupGray = Color(0xFFBCBCBC)
 
 val onMapButtonBackground = Color(0xFFFFFFFF)
+val onMapText = Color(0xFFBCBCBC)
 val onMapButtonText = Color(0xFF555555)

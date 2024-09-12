@@ -55,6 +55,8 @@ import com.fborowy.mapmyarea.presentation.MapStyle
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
 import com.fborowy.mapmyarea.presentation.components.MMAHeader
 import com.fborowy.mapmyarea.presentation.components.MMATextField
+import com.fborowy.mapmyarea.ui.theme.ButtonBlack
+import com.fborowy.mapmyarea.ui.theme.Typography
 import com.fborowy.mapmyarea.ui.theme.onMapButtonBackground
 import com.fborowy.mapmyarea.ui.theme.onMapButtonText
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -150,8 +152,10 @@ fun MapScreen(
                     MMATextField(
                         value = searchText,
                         onValueChange = { mapViewModel.updateSearchText(it) },
-                        placeholder = { Text(text = stringResource(id = R.string.search_place)) },
-                        isHidden = false
+                        placeholder = stringResource(id = R.string.search_place),
+                        isHidden = false,
+                        textStyle = Typography.bodySmall,
+                        focusedColor = ButtonBlack.copy(alpha = 0.8f)
                     )
                 }
                 if (searchResult.results.isNotEmpty()) {
@@ -180,9 +184,9 @@ fun MapScreen(
                                         showMarkerInfo = true
                                     }
                             ) {
-                                Text(text = place.name)
+                                Text(text = place.name, style = Typography.bodyMedium)
                                 if (!place.buildingName.isNullOrBlank())
-                                    Text(text = "${place.buildingName}, ${stringResource(id = R.string.floor)} ${place.level}")
+                                    Text(text = "${place.buildingName}, ${stringResource(id = R.string.floor)} ${place.level}", style = Typography.labelMedium)
                             }
                             Spacer(modifier = Modifier
                                 .height(1.dp)
@@ -307,7 +311,8 @@ fun MapScreen(
                                 Text(
                                     text = displayedMarker.markerName
                                         ?: stringResource(id = R.string.not_found),
-                                    modifier = Modifier.padding(bottom = 10.dp)
+                                    modifier = Modifier.padding(bottom = 10.dp),
+                                    style = Typography.titleSmall
                                 )
                                 Box(
                                     modifier = Modifier
@@ -337,7 +342,8 @@ fun MapScreen(
                                     if (displayedMarker.markerDescription != "" && displayedMarker.markerDescription != null) {
                                         Text(
                                             text = displayedMarker.markerDescription as String,
-                                            modifier = Modifier.padding(bottom = 10.dp)
+                                            modifier = Modifier.padding(bottom = 10.dp),
+                                            style = Typography.bodyMedium
                                         )
                                     }
                                     if (displayedMarker.type == MarkerType.BUILDING) {
@@ -350,7 +356,8 @@ fun MapScreen(
                                             for (floor in displayedMarker.floors) {
                                                 Text(
                                                     "${stringResource(id = R.string.floor)} ${floor.level}",
-                                                    Modifier.clickable {
+                                                    style = Typography.bodyMedium,
+                                                    modifier = Modifier.clickable {
                                                         selectedFloor = floor.level
                                                     }
                                                 )
@@ -366,6 +373,7 @@ fun MapScreen(
                                                                 Column {
                                                                     Text(
                                                                         text = room.name,
+                                                                        style = Typography.bodySmall,
                                                                         modifier = Modifier
                                                                             .clickable {
                                                                                 showDescription = !(showDescription)
@@ -373,13 +381,17 @@ fun MapScreen(
                                                                     )
                                                                     if (showDescription) {
                                                                         Text(
-                                                                            text = room.description
+                                                                            text = room.description,
+                                                                            style = Typography.labelLarge,
+                                                                            modifier = Modifier.padding(start = 5.dp)
                                                                         )
                                                                     }
                                                                 }
                                                             }
                                                         } else {
-                                                            Text(stringResource(id = R.string.empty_floor))
+                                                            Text(
+                                                                stringResource(id = R.string.empty_floor),
+                                                                style = Typography.bodySmall,                                                            )
                                                         }
                                                     }
                                                 }

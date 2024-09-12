@@ -7,9 +7,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -20,9 +23,11 @@ import com.fborowy.mapmyarea.ui.theme.Typography
 fun MMATextField(
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: @Composable () -> Unit,
+    placeholder: String,
     isHidden: Boolean,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    textStyle: TextStyle = Typography.bodyMedium,
+    focusedColor: Color = MaterialTheme.colorScheme.onSecondary
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -30,22 +35,24 @@ fun MMATextField(
         unfocusedTextColor = MaterialTheme.colorScheme.onTertiary,
         unfocusedPlaceholderColor = MaterialTheme.colorScheme.onTertiary,
         unfocusedBorderColor = MaterialTheme.colorScheme.onTertiary,
-        focusedTextColor = MaterialTheme.colorScheme.onSecondary,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondary,
-        focusedBorderColor = MaterialTheme.colorScheme.onSecondary,
-        cursorColor = MaterialTheme.colorScheme.onSecondary
-
+        focusedTextColor = focusedColor,
+        focusedPlaceholderColor = focusedColor,
+        focusedBorderColor = focusedColor,
+        cursorColor = focusedColor,
     )
+
     OutlinedTextField(
         value = value,
         onValueChange = { onValueChange(it) },
-        placeholder = placeholder,
+        placeholder = { 
+                      Text(text = placeholder, style = textStyle)
+                      },
         visualTransformation = if (isHidden) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = Modifier
             .fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = textFieldColors,
-        textStyle = Typography.bodyMedium,
+        textStyle = textStyle,
         keyboardActions = KeyboardActions(
             onDone = {
                 focusManager.clearFocus()
@@ -54,6 +61,6 @@ fun MMATextField(
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done
         ),
-        enabled = enabled
+        enabled = enabled,
     )
 }
