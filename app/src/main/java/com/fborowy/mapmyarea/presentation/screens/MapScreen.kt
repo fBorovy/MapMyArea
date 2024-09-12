@@ -5,13 +5,16 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,7 +37,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +54,9 @@ import com.fborowy.mapmyarea.domain.view_models.MapViewModel
 import com.fborowy.mapmyarea.presentation.MapStyle
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
 import com.fborowy.mapmyarea.presentation.components.MMAHeader
+import com.fborowy.mapmyarea.presentation.components.MMATextField
+import com.fborowy.mapmyarea.ui.theme.onMapButtonBackground
+import com.fborowy.mapmyarea.ui.theme.onMapButtonText
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -70,12 +80,15 @@ fun MapScreen(
 ) {
 
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     var showMarkerInfo by rememberSaveable { mutableStateOf(false) }
     val displayedMarker by mapViewModel.currentMarkerInfo.collectAsState()
     val selectedLocation = rememberSaveable { mutableStateOf<LatLng?>(null) }
     val cameraPositionState = rememberCameraPositionState()
     val coroutineScope = rememberCoroutineScope()
-
+    val searchText by mapViewModel.searchText.collectAsState()
+    val searchResult by mapViewModel.searchResult.collectAsState()
 
     val mapUiSettings = MapUiSettings(
         rotationGesturesEnabled = true,
@@ -84,31 +97,99 @@ fun MapScreen(
         //mapToolbarEnabled = false,
     )
 
+    LaunchedEffect(Unit) {
+        mapViewModel.resetMarker()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    keyboardController?.hide() // Ukrywa klawiaturę
+                    focusManager.clearFocus()
+                    mapViewModel.resetSearchResult()
+                    mapViewModel.resetSearchText()
+                })
+            }
             .background(MaterialTheme.colorScheme.background),
+
     ) {
         Box {
             Column(
-                modifier = Modifier
-                    .shadow(
-                        elevation = 9.dp,
-                        shape = RoundedCornerShape(bottomEnd = 25.dp, bottomStart = 25.dp),
-                        clip = true
+                modifier = Modifier.zIndex(1f)
+            ){
+                Box(
+                    modifier = Modifier
+                        .shadow(
+                            elevation = 9.dp,
+                            shape = RoundedCornerShape(bottomEnd = 25.dp, bottomStart = 25.dp),
+                            clip = true
+                        )
+                        .zIndex(1f)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(bottomEnd = 20.dp, bottomStart = 20.dp))
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(10.dp)
+                ) {
+                    MMAHeader(
+                        header = map.mapName?: stringResource(id = R.string.unknown_map),
+                        onGoBack = {
+                            navController.popBackStack()
+                        }
                     )
-                    .zIndex(1f)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(bottomEnd = 20.dp, bottomStart = 20.dp))
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(10.dp)
-            ) {
-                MMAHeader(
-                    header = map.mapName?: stringResource(id = R.string.unknown_map),
-                    onGoBack = {
-                        navController.popBackStack()
+                }
+                Box(
+                    modifier = Modifier
+                        .zIndex(1f)
+                        .fillMaxWidth()
+                        .padding(start = 10.dp, top = 10.dp, end = 60.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(onMapButtonBackground.copy(alpha = 0.75f))
+                ) {
+                    MMATextField(
+                        value = searchText,
+                        onValueChange = { mapViewModel.updateSearchText(it) },
+                        placeholder = { Text(text = stringResource(id = R.string.search_place)) },
+                        isHidden = false
+                    )
+                }
+                if (searchResult.results.isNotEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 10.dp, end = 60.dp)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(onMapButtonBackground.copy(alpha = 0.55f))
+                            .padding(horizontal = 10.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        for (place in searchResult.results) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                        mapViewModel.resetSearchResult()
+                                        mapViewModel.resetSearchText()
+                                        coroutineScope.launch {
+                                            cameraPositionState.animate(CameraUpdateFactory.newLatLng(place.location), CENTER_MAP_DURATION_IN_MS)
+                                        }
+                                        mapViewModel.switchMarker(location = place.location, level = place.level)
+                                        showMarkerInfo = true
+                                    }
+                            ) {
+                                Text(text = place.name)
+                                if (!place.buildingName.isNullOrBlank())
+                                    Text(text = "${place.buildingName}, ${stringResource(id = R.string.floor)} ${place.level}")
+                            }
+                            Spacer(modifier = Modifier
+                                .height(1.dp)
+                                .background(onMapButtonText))
+                        }
                     }
-                )
+                }
             }
             GoogleMap(
                 modifier = Modifier
@@ -123,9 +204,19 @@ fun MapScreen(
                     minZoomPreference = 17f,
                     maxZoomPreference = 19f,
                 ), //app must have a localisation permission first in order to enable it
-                onMyLocationButtonClick = { false },
+                onMyLocationButtonClick = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    mapViewModel.resetSearchResult()
+                    mapViewModel.resetSearchText()
+                    false
+                                          },
                 uiSettings = mapUiSettings,
                 onMapClick = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    mapViewModel.resetSearchResult()
+                    mapViewModel.resetSearchText()
                     selectedLocation.value = null
                     if (showMarkerInfo) {
                         mapViewModel.resetMarker()
@@ -165,6 +256,10 @@ fun MapScreen(
                                     if (displayedMarker == marker) biggerMarkerOtherBitmap else markerOtherBitmap
                             },
                             onClick = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                mapViewModel.resetSearchResult()
+                                mapViewModel.resetSearchText()
                                 coroutineScope.launch {
                                     cameraPositionState.animate(CameraUpdateFactory.newLatLng(marker.localisation), CENTER_MAP_DURATION_IN_MS)
                                 }
@@ -195,78 +290,77 @@ fun MapScreen(
             }
             if (showMarkerInfo) {
                 Column {
-                    Box(modifier = Modifier.weight(1f))
+                    Box(modifier = Modifier.weight(1.3f))
                     Column(modifier = Modifier.weight(1f)) {
                         Box(modifier = Modifier.weight(1f))
-                        Box(
+                        Column(
                             modifier = Modifier
                                 .shadow(elevation = 5.dp)
                                 .clip(RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp))
                                 .background(MaterialTheme.colorScheme.background)
                                 .padding(20.dp)
                         ) {
-                            Column {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = displayedMarker.markerName
+                                        ?: stringResource(id = R.string.not_found),
+                                    modifier = Modifier.padding(bottom = 10.dp)
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .shadow(5.dp, RoundedCornerShape(15.dp))
+                                        .size(30.dp)
+                                        .clip(RoundedCornerShape(15.dp))
+                                        .background(MaterialTheme.colorScheme.secondary)
+                                        .clickable {
+                                            //TODO
+                                        },
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
-                                        text = displayedMarker.markerName
-                                            ?: stringResource(id = R.string.not_found),
-                                        modifier = Modifier.padding(bottom = 10.dp)
+                                    Image(
+                                        painter = painterResource(id = R.drawable.navigate_arrow),
+                                        contentDescription = stringResource(
+                                            id = R.string.navigate,
+                                        ),
+                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary)
                                     )
-                                    Box(
-                                        modifier = Modifier
-                                            .shadow(5.dp, RoundedCornerShape(15.dp))
-                                            .size(30.dp)
-                                            .clip(RoundedCornerShape(15.dp))
-                                            .background(MaterialTheme.colorScheme.secondary)
-                                            .clickable {
-
-                                                //TODO
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.navigate_arrow),
-                                            contentDescription = stringResource(
-                                                id = R.string.navigate,
-                                            ),
-                                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary)
+                                }
+                            }
+                            MMAContentBox {
+                                Column(
+                                    modifier = Modifier
+                                        .verticalScroll(rememberScrollState())
+                                ) {
+                                    if (displayedMarker.markerDescription != "" && displayedMarker.markerDescription != null) {
+                                        Text(
+                                            text = displayedMarker.markerDescription as String,
+                                            modifier = Modifier.padding(bottom = 10.dp)
                                         )
                                     }
-                                }
-                                MMAContentBox {
-                                    Column(
-                                        modifier = Modifier
-                                            .verticalScroll(rememberScrollState())
-                                    ) {
-                                        if (displayedMarker.markerDescription != "" && displayedMarker.markerDescription != null) {
-                                            Text(
-                                                text = displayedMarker.markerDescription as String,
-                                                modifier = Modifier.padding(bottom = 10.dp)
-                                            )
-                                        }
-                                        if (displayedMarker.type == MarkerType.BUILDING) {
-                                            var selectedFloor by remember { mutableIntStateOf(170) }
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(start = 10.dp)
-                                            ) {
-                                                for (floor in displayedMarker.floors) {
-                                                    Text(
-                                                        "${stringResource(id = R.string.floor)} ${floor.level}",
-                                                        Modifier.clickable {
-                                                            selectedFloor = floor.level
-                                                        }
-                                                    )
-                                                    if (selectedFloor == floor.level) {
-                                                        Column(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .padding(start = 10.dp)
-                                                        ) {
+                                    if (displayedMarker.type == MarkerType.BUILDING) {
+                                        var selectedFloor by remember { mutableIntStateOf(mapViewModel.selectedLevel.value) }
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(start = 10.dp)
+                                        ) {
+                                            for (floor in displayedMarker.floors) {
+                                                Text(
+                                                    "${stringResource(id = R.string.floor)} ${floor.level}",
+                                                    Modifier.clickable {
+                                                        selectedFloor = floor.level
+                                                    }
+                                                )
+                                                if (selectedFloor == floor.level) {
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(start = 10.dp)
+                                                    ) {
+                                                        if (floor.rooms.isNotEmpty()) {
                                                             for (room in floor.rooms) {
                                                                 var showDescription by rememberSaveable { mutableStateOf(false) }
                                                                 Column {
@@ -284,6 +378,8 @@ fun MapScreen(
                                                                     }
                                                                 }
                                                             }
+                                                        } else {
+                                                            Text(stringResource(id = R.string.empty_floor))
                                                         }
                                                     }
                                                 }

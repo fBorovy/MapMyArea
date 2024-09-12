@@ -17,5 +17,5 @@ val DropDownMenuGray = Color(0xFF494949)
 val TextFieldGray = Color(0xFF898989)
 val InstructionPopupGray = Color(0xFFBCBCBC)
 
-val onMapButtonBackground = Color(0xFFBDBFBF)
-val onMapButtonText = Color(0xFF666666)
+val onMapButtonBackground = Color(0xFFFFFFFF)
+val onMapButtonText = Color(0xFF555555)

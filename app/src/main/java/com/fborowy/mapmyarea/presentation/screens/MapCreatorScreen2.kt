@@ -238,20 +238,20 @@ fun MapCreatorScreen2(
                     MMAButton(text = stringResource(id = R.string.new_building_button_text), onClick = {
                         mapCreatorViewModel.setMarkerType(MarkerType.BUILDING)
                         navController.navigate(Screen.MarkerConfigurationScreen.route) },
-                        backgroundColor = onMapButtonBackground,
+                        backgroundColor = onMapButtonBackground.copy(alpha = 0.75f),
                         textColor = onMapButtonText
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     MMAButton(text = stringResource(id = R.string.new_parking_button_text), onClick = {
                         mapCreatorViewModel.setMarkerType(MarkerType.PARKING)
                         navController.navigate(Screen.MarkerConfigurationScreen.route) },
-                        backgroundColor = onMapButtonBackground,
+                        backgroundColor = onMapButtonBackground.copy(alpha = 0.75f),
                         textColor = onMapButtonText)
                     Spacer(modifier = Modifier.height(10.dp))
                     MMAButton(text = stringResource(id = R.string.new_other_button_text), onClick = {
                         mapCreatorViewModel.setMarkerType(MarkerType.OTHER)
                         navController.navigate(Screen.MarkerConfigurationScreen.route) },
-                        backgroundColor = onMapButtonBackground,
+                        backgroundColor = onMapButtonBackground.copy(alpha = 0.75f),
                         textColor = onMapButtonText
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -261,7 +261,7 @@ fun MapCreatorScreen2(
                     onClick = {
                         navController.navigate(Screen.MapCreatorScreen3.route)
                     },
-                    backgroundColor = onMapButtonBackground,
+                    backgroundColor = onMapButtonBackground.copy(alpha = 0.75f),
                     textColor = onMapButtonText
                 )
             }

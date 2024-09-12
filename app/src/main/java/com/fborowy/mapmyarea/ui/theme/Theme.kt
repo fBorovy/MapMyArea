@@ -40,8 +40,8 @@ private val DarkColorScheme = darkColorScheme(
     background = Color(0xFF181818),
 
     onPrimary = Color.White,
-    onSecondary = Color(0xFFD6D6D6),
-    onTertiary = Color(0xFFE0E0E0),
+    onSecondary = Color(0xFFC5C5C5),
+    onTertiary = Color(0xFFD9D9D9),
     onBackground = Color.White
 )
 

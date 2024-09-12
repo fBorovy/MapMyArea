@@ -131,7 +131,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
                     ) {
                         Box(
                             modifier = Modifier
-                                .padding(start = 10.dp)
+                                .padding(start = 1.dp)
                                 .clickable {
                                     if (areRemoveFloorButtonsActive) {
                                         mapCreatorViewModel.removeFloor(onTop = false)
@@ -193,7 +193,8 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
                                                     Log.d("LEVEL", "${floor.level}")
                                                     navController.navigate(Screen.FloorConfigurationScreen.route)
                                                 },
-                                            color = MaterialTheme.colorScheme.onSecondary
+                                            color = MaterialTheme.colorScheme.onSecondary,
+                                            textAlign = TextAlign.Center
                                         )
                                     }
                                 }
@@ -218,7 +219,7 @@ fun MarkerConfigurationScreen(mapCreatorViewModel: MapCreatorViewModel, navContr
                         }
                         Box(
                             modifier = Modifier
-                                .padding(end = 10.dp)
+                                .padding(end = 1.dp)
                                 .clickable {
                                     if (areRemoveFloorButtonsActive) {
                                         mapCreatorViewModel.removeFloor(onTop = true)

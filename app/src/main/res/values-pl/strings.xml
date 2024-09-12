@@ -52,7 +52,7 @@
     <string name="save">Zapisz</string>
     <string name="one_floor_required">Budynek musi składać się z conajmniej jednego piętra.</string>
     <string name="remove_first_floor">Usuń\npierwsze\npiętro</string>
-    <string name="remove_last_floor">Usuń\\nostatnie\\npiętro</string>
+    <string name="remove_last_floor">Usuń\nostatnie\npiętro</string>
     <string name="max_floor_amount_easter_egg">Budynek wyższy od Burj Khalifa? ;)</string>
     <string name="new_floor_popup_title">Kreator piętra</string>
     <string name="floor_level">Piętro</string>
@@ -65,7 +65,7 @@
     <string name="rooms">Pomieszczenia</string>
     <string name="set_map_points_instruction_popup">Kliknij na mapę, aby dodać znaczniki.</string>
     <string name="new_point">Nowy %s</string>
-    <string name="map_saved_popup">Mapa zapisana. Inni użytkownicy mogą ją znaleźć po jej nazwie.</string>
+    <string name="map_saved_popup">Mapa zapisana.\nInni użytkownicy mogą ją znaleźć po jej nazwie.</string>
     <string name="map_name">Nazwa mapy</string>
     <string name="map_description">Opis mapy (opcjonalnie)</string>
     <string name="enter_room_name">Nazwa pomieszczenia (np.: Pokój 102)</string>
@@ -101,4 +101,6 @@
     <string name="delete_marker_icon">Usuń znacznik</string>
     <string name="remove_marker_confitmation">Usunąć ten element?</string>
     <string name="marker_name_in_use">Znacznik o podanej nazwie już istnieje w Twojej mapie. Wprowadź inną nazwę.</string>
+    <string name="search_place">Szukaj</string>
+    <string name="empty_floor">Brak pomieszczeń na tym piętrze</string>
 </resources>

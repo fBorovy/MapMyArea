@@ -52,7 +52,6 @@ fun AppNavigation(
 
     val appViewModel: AppViewModel = viewModel()
     val mapCreatorViewModel: MapCreatorViewModel = viewModel()
-    val mapViewModel: MapViewModel = viewModel()
     val signInState by appViewModel.signInState.collectAsStateWithLifecycle()
     val emailAuthClient = EmailAuthClient()
     val googleAuthUiClient by lazy {
@@ -203,9 +202,10 @@ fun AppNavigation(
             )
         }
         composable(route = Screen.MapScreen.route) {
+            val map = appViewModel.getDisplayedMapInfo()
             MapScreen(
-                mapViewModel,
-                appViewModel.getDisplayedMapInfo(),
+                MapViewModel(map),
+                map,
                 navController
             )
         }

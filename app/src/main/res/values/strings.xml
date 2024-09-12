@@ -103,5 +103,7 @@
     <string name="delete_marker_icon">Delete marker</string>
     <string name="remove_marker_confitmation">Are you sure you want to remove this element?</string>
     <string name="marker_name_in_use">There already is a point with this name in your map. Provide other name.</string>
+    <string name="search_place">Search</string>
+    <string name="empty_floor">There are no rooms on this floor</string>
 
 </resources>

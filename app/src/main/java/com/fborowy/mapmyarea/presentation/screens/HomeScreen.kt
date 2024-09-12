@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,6 +53,7 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     val searchText by appViewModel.searchText.collectAsState()
     val addingMapState by appViewModel.addingMapState.collectAsState()
     val userData by appViewModel.userData.collectAsState()
@@ -84,6 +86,7 @@ fun HomeScreen(
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     keyboardController?.hide() // Ukrywa klawiaturę
+                    focusManager.clearFocus()
                 })
             }
             .background(MaterialTheme.colorScheme.background)
@@ -166,6 +169,7 @@ fun HomeScreen(
                                     .padding(top = 4.dp)
                                     .clickable {
                                         keyboardController?.hide()
+                                        focusManager.clearFocus()
                                         mapToDeleteName = map.mapName!!
                                         showOwnMapDeletionConfirmationDialog = true
                                     }
@@ -240,6 +244,7 @@ fun HomeScreen(
                                 .padding(top = 4.dp)
                                 .clickable {
                                     keyboardController?.hide()
+                                    focusManager.clearFocus()
                                     mapToDeleteName = map.mapName!!
                                     showSavedMapRemovalConfirmationDialog = true
                                 }
@@ -252,6 +257,7 @@ fun HomeScreen(
     if (addingMapState.addingSuccessful) {
         appViewModel.clearSearchText()
         keyboardController?.hide()
+        focusManager.clearFocus()
         appViewModel.clearSearchText()
         appViewModel.resetAddingMapState()
     }
