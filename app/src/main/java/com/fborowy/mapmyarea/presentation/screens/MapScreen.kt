@@ -155,16 +155,17 @@ fun MapScreen(
                         placeholder = stringResource(id = R.string.search_place),
                         isHidden = false,
                         textStyle = Typography.bodySmall,
-                        focusedColor = ButtonBlack.copy(alpha = 0.8f)
+                        unfocusedColor = onMapButtonText,
+                        focusedColor = ButtonBlack
                     )
                 }
                 if (searchResult.results.isNotEmpty()) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 10.dp, end = 60.dp)
+                            .padding(start = 13.dp, end = 63.dp)
                             .clip(RoundedCornerShape(11.dp))
-                            .background(onMapButtonBackground.copy(alpha = 0.55f))
+                            .background(onMapButtonBackground.copy(alpha = 0.65f))
                             .padding(horizontal = 10.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
@@ -172,6 +173,7 @@ fun MapScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .padding(3.dp)
                                     .clickable {
                                         keyboardController?.hide()
                                         focusManager.clearFocus()
@@ -189,6 +191,7 @@ fun MapScreen(
                                     Text(text = "${place.buildingName}, ${stringResource(id = R.string.floor)} ${place.level}", style = Typography.labelMedium)
                             }
                             Spacer(modifier = Modifier
+                                .fillMaxWidth()
                                 .height(1.dp)
                                 .background(onMapButtonText))
                         }

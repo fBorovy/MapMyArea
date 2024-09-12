@@ -27,14 +27,15 @@ fun MMATextField(
     isHidden: Boolean,
     enabled: Boolean = true,
     textStyle: TextStyle = Typography.bodyMedium,
+    unfocusedColor: Color = MaterialTheme.colorScheme.onTertiary,
     focusedColor: Color = MaterialTheme.colorScheme.onSecondary
 ) {
     val focusManager = LocalFocusManager.current
 
     val textFieldColors = OutlinedTextFieldDefaults.colors(
-        unfocusedTextColor = MaterialTheme.colorScheme.onTertiary,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onTertiary,
-        unfocusedBorderColor = MaterialTheme.colorScheme.onTertiary,
+        unfocusedTextColor = unfocusedColor,
+        unfocusedPlaceholderColor = unfocusedColor,
+        unfocusedBorderColor = unfocusedColor,
         focusedTextColor = focusedColor,
         focusedPlaceholderColor = focusedColor,
         focusedBorderColor = focusedColor,
