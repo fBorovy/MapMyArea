@@ -256,6 +256,7 @@ fun MapScreen(
                     ),
                     minZoomPreference = 17f,
                     maxZoomPreference = 19f,
+
                 ), //app must have a localisation permission first in order to enable it
                 onMyLocationButtonClick = {
                     keyboardController?.hide()
@@ -265,10 +266,11 @@ fun MapScreen(
                     false },
                 uiSettings = mapUiSettings,
                 onMapClick = {
+                    selectedLocation.value = null
                     keyboardController?.hide()
                     focusManager.clearFocus()
                     markerHere = false
-                    selectedLocation.value = null
+                    mapViewModel.clearRoutes()
                     mapViewModel.resetSearchResult()
                     mapViewModel.resetSearchText()
                     if (showMarkerInfo) {
@@ -365,13 +367,13 @@ fun MapScreen(
                         showMarkerInfo = true
                     }
                 }
-                departureLocation.value?.let {
-                    Marker(
-                        title = "out of bounds - (${it.latitude}) (${it.longitude})",
-                        state = MarkerState(position = it),
-                        icon = markerUnknownBitmap,
-                    )
-                }
+//                departureLocation.value?.let {
+//                    Marker(
+//                        title = "out of bounds - (${it.latitude}) (${it.longitude})",
+//                        state = MarkerState(position = it),
+//                        icon = markerUnknownBitmap,
+//                    )
+//                }
             }
             if (showMarkerInfo) {
                 Column {
