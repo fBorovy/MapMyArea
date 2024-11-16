@@ -2,6 +2,7 @@ package com.fborowy.mapmyarea.data
 
 import android.util.Log
 import com.fborowy.mapmyarea.R
+import com.fborowy.mapmyarea.data.classes.DirectionsResponse
 import com.fborowy.mapmyarea.data.classes.FloorData
 import com.fborowy.mapmyarea.data.classes.MapData
 import com.fborowy.mapmyarea.data.classes.MarkerData
@@ -19,6 +20,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Singleton
@@ -27,9 +32,25 @@ class Repository (
     private val auth: FirebaseAuth = Firebase.auth
 ) {
 
+    val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+    val client = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .build()
+
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl("https://maps.googleapis.com/maps/api/")
+        .client(client)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val directionsApiService: DirectionsApiService = retrofit.create(DirectionsApiService::class.java)
+
     fun checkIfLogged(): Boolean {
         return (auth.currentUser != null)
     }
+
     suspend fun getSignedUserInfo(): UserData? {
         return try {
             val userDocumentReference = database.collection("users").document(auth.currentUser!!.email!!)
@@ -58,6 +79,7 @@ class Repository (
             throw e
         }
     }
+
     suspend fun addEditMap(map: MapData, isMapEdited: Boolean): SavingMapState {
         val docRef = database.collection("maps").document(map.mapName!!)
         val mapDocument = docRef.get().await()
@@ -129,7 +151,6 @@ class Repository (
             AddingMapState(false, R.string.unknown_error)
         }
     }
-
 
     fun deleteOwnMap(mapId: String) {
         try {
@@ -222,5 +243,14 @@ class Repository (
                     }
                 }
             }
+    }
+
+    suspend fun getRoutes(origin: String, destination: String, apiKey: String): Pair<DirectionsResponse, DirectionsResponse> {
+        val driving = directionsApiService.getDirections(origin, destination, "driving", "metric", false, apiKey)
+        val walking = directionsApiService.getDirections(origin, destination, "walking", "metric", false, apiKey)
+        Log.d("API Response - Driving", driving.routes.toString())
+        Log.d("API Response - Walking", walking.routes.toString())
+        Log.d("API Response - Walking", walking.routes[0].overviewPolyline?.points.toString())
+        return Pair(driving, walking)
     }
 }

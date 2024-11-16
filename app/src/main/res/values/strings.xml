@@ -105,5 +105,8 @@
     <string name="marker_name_in_use">There already is a point with this name in your map. Provide other name.</string>
     <string name="search_place">Search</string>
     <string name="empty_floor">There are no rooms on this floor</string>
+    <string name="location_could_not_be_found">Coultn\'t find location of your device</string>
+    <string name="directions_walk">Directions: walk</string>
+    <string name="directions_car">Directions: car</string>
 
 </resources>

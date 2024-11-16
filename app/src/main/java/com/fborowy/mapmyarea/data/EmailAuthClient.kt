@@ -69,7 +69,7 @@ class EmailAuthClient(
             }
     }
 
-    fun signInWithEmail(email: String?, password: String?, onComplete: (SignInResult) -> Unit){
+    fun signInWithEmail(email: String?, password: String?, onComplete: (SignInResult) -> Unit) {
         if (email == null || password == null ) {
             val e = Exception()
             e.printStackTrace()

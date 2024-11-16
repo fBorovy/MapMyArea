@@ -21,6 +21,7 @@ class LocationPermissionViewModel: ViewModel() {
 
     private val _shouldDialogBeVisible = MutableStateFlow(false)
     val shouldDialogBeVisible: StateFlow<Boolean> = _shouldDialogBeVisible.asStateFlow()
+
     fun setDialogVisibility(flag: Boolean) {
         _shouldDialogBeVisible.update {
             flag

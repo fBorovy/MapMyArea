@@ -31,6 +31,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -70,19 +71,29 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //viewModel
+    implementation(libs.viewModel)
+
+    //Navigation
+    implementation(libs.androidx.navigation)
+    implementation(libs.androidx.lifecycle)
+
     //Firebase
     implementation(platform(libs.firebase))
     implementation(libs.firebase.analytics)
     implementation(libs.play.services) //google play auth services are used for authentication with google account using firebase
     implementation(libs.firebase.firestore)
-    
-    //Navigation
-    implementation(libs.androidx.navigation)
-    implementation(libs.androidx.lifecycle)
 
     //Google Maps
     implementation(libs.google.maps.compose)
 
-    //viewModel
-    implementation(libs.viewModel)
+    //android location service
+    implementation(libs.play.services.location)
+
+    //retrofit api service
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    //network logging
+    implementation(libs.logging.interceptor)
 }

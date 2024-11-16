@@ -47,7 +47,7 @@ class RegistrationViewModel: ViewModel() {
         password2 = newPass2
     }
 
-    fun signUp(emailAuthClient: EmailAuthClient, onSignUpClick: (SignInResult) -> Unit){
+    fun signUp(emailAuthClient: EmailAuthClient, onSignUpClick: (SignInResult) -> Unit) {
         viewModelScope.launch {
             try {
                 emailAuthClient.signUpWithEmail(

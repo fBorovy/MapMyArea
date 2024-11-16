@@ -1,7 +1,11 @@
 package com.fborowy.mapmyarea.presentation.screens
 
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Location
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -43,8 +49,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.fborowy.mapmyarea.R
 import com.fborowy.mapmyarea.data.classes.MapData
@@ -59,6 +67,8 @@ import com.fborowy.mapmyarea.ui.theme.ButtonBlack
 import com.fborowy.mapmyarea.ui.theme.Typography
 import com.fborowy.mapmyarea.ui.theme.onMapButtonBackground
 import com.fborowy.mapmyarea.ui.theme.onMapButtonText
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -69,6 +79,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 
@@ -87,20 +98,53 @@ fun MapScreen(
     var showMarkerInfo by rememberSaveable { mutableStateOf(false) }
     val displayedMarker by mapViewModel.currentMarkerInfo.collectAsState()
     val selectedLocation = rememberSaveable { mutableStateOf<LatLng?>(null) }
+    val departureLocation = rememberSaveable { mutableStateOf<LatLng?>(null) }
     val cameraPositionState = rememberCameraPositionState()
     val coroutineScope = rememberCoroutineScope()
     val searchText by mapViewModel.searchText.collectAsState()
     val searchResult by mapViewModel.searchResult.collectAsState()
+    val fusedLocationClient: FusedLocationProviderClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    var hasLocationPermission by remember { mutableStateOf(false) }
+    val routes by mapViewModel.routes.collectAsState()
+    var driving by rememberSaveable { mutableStateOf(false) }
+    val walkingPath by mapViewModel.walkingPolylinePath.collectAsState()
+    val drivingPath by mapViewModel.drivingPolylinePath.collectAsState()
+
+    val appInfo = context.packageManager.getApplicationInfo(
+        context.packageName,
+        PackageManager.GET_META_DATA
+    )
+    val bundle = appInfo.metaData
+
+    val couldNotFindLocationToast = Toast.makeText(
+        context,
+        stringResource(R.string.location_could_not_be_found),
+        Toast.LENGTH_SHORT,
+    )
 
     val mapUiSettings = MapUiSettings(
         rotationGesturesEnabled = true,
         myLocationButtonEnabled = true, //isMyLocationEnabled has to be true too to display it
         compassEnabled = true,
+        zoomControlsEnabled = !showMarkerInfo,
         //mapToolbarEnabled = false,
     )
 
+    LaunchedEffect(routes, driving) {
+        Log.d("launched routes", routes.toString())
+        if (routes != null) {
+            Log.d("routes not null", "")
+            mapViewModel.decodeOverviewPolyline(routes!!.first.routes[0].overviewPolyline?.points, true)
+            mapViewModel.decodeOverviewPolyline(routes!!.second.routes[0].overviewPolyline?.points, false)
+        }
+    }
+
     LaunchedEffect(Unit) {
         mapViewModel.resetMarker()
+        hasLocationPermission = ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     Column(
@@ -224,18 +268,37 @@ fun MapScreen(
                     focusManager.clearFocus()
                     mapViewModel.resetSearchResult()
                     mapViewModel.resetSearchText()
-                    selectedLocation.value = null
                     if (showMarkerInfo) {
                         mapViewModel.resetMarker()
                         showMarkerInfo = false
                     }
                 },
                 onMapLongClick = {
+                    mapViewModel.clearRoutes()
                     selectedLocation.value = it
                 },
                 contentPadding = PaddingValues(top = 60.dp),
                 cameraPositionState = cameraPositionState,
+
             ) {
+                if (departureLocation.value != null) {
+                    drivingPath?.let {
+                        val path = emptyArray<LatLng>()
+                        Polyline(
+                            points = (path + departureLocation.value!! + drivingPath!! + selectedLocation.value!!).toList(),
+                            color = Color.White,
+                            visible = driving,
+                        )
+                    }
+                    walkingPath?.let {
+                        val path = emptyArray<LatLng>()
+                        Polyline(
+                            points = (path + departureLocation.value!! + walkingPath!! + selectedLocation.value!!).toList(),
+                            color = Color.White,
+                            visible = !driving,
+                        )
+                    }
+                }
                 val markerParkingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
                     BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 100, 100, true))
                 val markerBuildingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
@@ -270,7 +333,8 @@ fun MapScreen(
                                 coroutineScope.launch {
                                     cameraPositionState.animate(CameraUpdateFactory.newLatLng(marker.localisation), CENTER_MAP_DURATION_IN_MS)
                                 }
-                                selectedLocation.value = null
+                                selectedLocation.value = marker.localisation
+                                mapViewModel.clearRoutes()
                                 mapViewModel.switchMarker(marker)
                                 showMarkerInfo = true
                                 true
@@ -294,6 +358,13 @@ fun MapScreen(
                     )
                     showMarkerInfo = true
                 }
+                departureLocation.value?.let {
+                    Marker(
+                        title = "out of bounds - (${it.latitude}) (${it.longitude})",
+                        state = MarkerState(position = it),
+                        icon = markerUnknownBitmap,
+                    )
+                }
             }
             if (showMarkerInfo) {
                 Column {
@@ -304,7 +375,7 @@ fun MapScreen(
                             modifier = Modifier
                                 .shadow(elevation = 5.dp)
                                 .clip(RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp))
-                                .background(MaterialTheme.colorScheme.background)
+                                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
                                 .padding(20.dp)
                         ) {
                             Row(
@@ -315,26 +386,91 @@ fun MapScreen(
                                     text = displayedMarker.markerName
                                         ?: stringResource(id = R.string.not_found),
                                     modifier = Modifier.padding(bottom = 10.dp),
-                                    style = Typography.titleSmall
+                                    style = Typography.titleSmall,
+                                    overflow = TextOverflow.Ellipsis
                                 )
-                                Box(
-                                    modifier = Modifier
-                                        .shadow(5.dp, RoundedCornerShape(15.dp))
-                                        .size(30.dp)
-                                        .clip(RoundedCornerShape(15.dp))
-                                        .background(MaterialTheme.colorScheme.secondary)
-                                        .clickable {
-                                            //TODO
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.navigate_arrow),
-                                        contentDescription = stringResource(
-                                            id = R.string.navigate,
-                                        ),
-                                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary)
-                                    )
+                                Row {
+                                    if (routes != null) {
+                                        Box(
+                                            modifier = Modifier
+                                                .shadow(5.dp, RoundedCornerShape(15.dp))
+                                                .size(30.dp)
+                                                .clip(RoundedCornerShape(15.dp))
+                                                .background(MaterialTheme.colorScheme.secondary)
+                                                .clickable {
+                                                    driving = false
+                                                }
+                                                .padding(5.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Image(
+                                                painter = painterResource(R.drawable.directions_walk),
+                                                contentDescription = stringResource(R.string.directions_walk),
+                                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(5.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .shadow(5.dp, RoundedCornerShape(15.dp))
+                                                .size(30.dp)
+                                                .clip(RoundedCornerShape(15.dp))
+                                                .background(MaterialTheme.colorScheme.secondary)
+                                                .clickable {
+                                                    driving = true
+                                                }
+                                                .padding(2.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Image(
+                                                painter = painterResource(R.drawable.directions_car),
+                                                contentDescription = stringResource(R.string.directions_car),
+                                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(5.dp))
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .shadow(5.dp, RoundedCornerShape(15.dp))
+                                            .size(30.dp)
+                                            .clip(RoundedCornerShape(15.dp))
+                                            .background(MaterialTheme.colorScheme.secondary)
+                                            .clickable {
+                                                if (hasLocationPermission) {
+                                                    fusedLocationClient.lastLocation
+                                                        .addOnSuccessListener { location: Location? ->
+                                                            if (location != null) {
+                                                                val latitude = when {
+                                                                    location.latitude > map.northEastBound.latitude ->  map.northEastBound.latitude
+                                                                    location.latitude < map.southWestBound.latitude -> { map.southWestBound.latitude }
+                                                                    else -> location.latitude
+                                                                }
+                                                                val longitude = when {
+                                                                    location.longitude > map.northEastBound.longitude ->  map.northEastBound.longitude
+                                                                    location.longitude < map.southWestBound.longitude -> { map.southWestBound.longitude }
+                                                                    else -> location.longitude
+                                                                }
+                                                                val destination = if (showMarkerInfo) displayedMarker.localisation else selectedLocation.value
+                                                                departureLocation.value = LatLng(latitude, longitude)
+                                                                Log.d("destination", destination.toString())
+                                                                mapViewModel.getRoutes(departureLocation.value!!, destination!!, bundle.getString("com.google.android.geo.API_KEY"))
+                                                            } else {
+                                                                couldNotFindLocationToast.show()
+                                                            }
+                                                        }
+                                                }
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.navigate_arrow),
+                                            contentDescription = stringResource(
+                                                id = R.string.navigate,
+                                            ),
+                                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondary)
+                                        )
+                                    }
                                 }
                             }
                             MMAContentBox {
@@ -394,7 +530,8 @@ fun MapScreen(
                                                         } else {
                                                             Text(
                                                                 stringResource(id = R.string.empty_floor),
-                                                                style = Typography.bodySmall,                                                            )
+                                                                style = Typography.bodySmall,
+                                                            )
                                                         }
                                                     }
                                                 }

@@ -54,6 +54,7 @@ class MapCreatorViewModel: ViewModel() {
     private var _markerConfigurationErrorCode = MutableStateFlow<Int?>(null)
     val markerConfigurationErrorCode: StateFlow<Int?> = _markerConfigurationErrorCode
     private var originalMarkerName: String? = null
+
     fun addFloor(onTop: Boolean) {
         if (onTop) {
             _newMarkerState.update { it.copy(
@@ -352,16 +353,17 @@ class MapCreatorViewModel: ViewModel() {
 
     fun setNewMarkerState(markerName: String) {
         for (marker in _newMapState.value.markers) {
-            if (marker.markerName == markerName)
-            _newMarkerState.update {
-                NewMarkerState(
-                    marker.localisation,
-                    marker.markerName,
-                    marker.markerDescription,
-                    marker.type,
-                    "",
-                    marker.floors,
-                )
+            if (marker.markerName == markerName) {
+                _newMarkerState.update {
+                    NewMarkerState(
+                        marker.localisation,
+                        marker.markerName,
+                        marker.markerDescription,
+                        marker.type,
+                        "",
+                        marker.floors,
+                    )
+                }
             }
         }
         originalMarkerName = markerName
