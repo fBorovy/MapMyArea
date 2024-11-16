@@ -181,6 +181,8 @@ class MapViewModel(
     }
 
     fun clearRoutes() {
+        _walkingPolylinePath.value = null
+        _drivingPolylinePath.value = null
         _routes.value = null
     }
 }

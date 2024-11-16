@@ -106,6 +106,7 @@ fun MapScreen(
     val fusedLocationClient: FusedLocationProviderClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var hasLocationPermission by remember { mutableStateOf(false) }
     val routes by mapViewModel.routes.collectAsState()
+    var markerHere by remember { mutableStateOf(false) }
     var driving by rememberSaveable { mutableStateOf(false) }
     val walkingPath by mapViewModel.walkingPolylinePath.collectAsState()
     val drivingPath by mapViewModel.drivingPolylinePath.collectAsState()
@@ -219,6 +220,7 @@ fun MapScreen(
                                     .fillMaxWidth()
                                     .padding(3.dp)
                                     .clickable {
+                                        markerHere = false
                                         keyboardController?.hide()
                                         focusManager.clearFocus()
                                         mapViewModel.resetSearchResult()
@@ -260,12 +262,13 @@ fun MapScreen(
                     focusManager.clearFocus()
                     mapViewModel.resetSearchResult()
                     mapViewModel.resetSearchText()
-                    false
-                                          },
+                    false },
                 uiSettings = mapUiSettings,
                 onMapClick = {
                     keyboardController?.hide()
                     focusManager.clearFocus()
+                    markerHere = false
+                    selectedLocation.value = null
                     mapViewModel.resetSearchResult()
                     mapViewModel.resetSearchText()
                     if (showMarkerInfo) {
@@ -274,6 +277,7 @@ fun MapScreen(
                     }
                 },
                 onMapLongClick = {
+                    markerHere = false
                     mapViewModel.clearRoutes()
                     selectedLocation.value = it
                 },
@@ -333,6 +337,7 @@ fun MapScreen(
                                 coroutineScope.launch {
                                     cameraPositionState.animate(CameraUpdateFactory.newLatLng(marker.localisation), CENTER_MAP_DURATION_IN_MS)
                                 }
+                                markerHere = true
                                 selectedLocation.value = marker.localisation
                                 mapViewModel.clearRoutes()
                                 mapViewModel.switchMarker(marker)
@@ -343,20 +348,22 @@ fun MapScreen(
                     }
                 }
                 selectedLocation.value?.let {
-                    Marker(
-                        title = "(${it.latitude}) (${it.longitude})",
-                        state = MarkerState(position = it),
-                        icon = markerUnknownBitmap,
-                    )
-                    mapViewModel.switchMarker(
-                        MarkerData(
-                            markerName = stringResource(id = R.string.place_on_the_map),
-                            localisation = it,
-                            markerDescription = null,
-                            type = MarkerType.OTHER,
+                    if (!markerHere) {
+                        Marker(
+                            title = "(${it.latitude}) (${it.longitude})",
+                            state = MarkerState(position = it),
+                            icon = markerUnknownBitmap,
                         )
-                    )
-                    showMarkerInfo = true
+                        mapViewModel.switchMarker(
+                            MarkerData(
+                                markerName = stringResource(id = R.string.place_on_the_map),
+                                localisation = it,
+                                markerDescription = null,
+                                type = MarkerType.OTHER,
+                            )
+                        )
+                        showMarkerInfo = true
+                    }
                 }
                 departureLocation.value?.let {
                     Marker(

@@ -3,7 +3,6 @@ package com.fborowy.mapmyarea.presentation.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +25,7 @@ fun MMAHeader(
     onGoBack: (() -> Unit)? = null,
     textColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
-    Row(
+    Box(
         modifier = Modifier.fillMaxWidth()
     ) {
         if (onGoBack != null) {
@@ -48,7 +47,7 @@ fun MMAHeader(
                 text = header,
                 style = Typography.titleLarge,
                 color = textColor,
-                modifier = Modifier.align(Alignment.Center).padding(horizontal = 10.dp),
+                modifier = Modifier.align(Alignment.Center).padding(start = if (header.length > 19) 45.dp else 0.dp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
