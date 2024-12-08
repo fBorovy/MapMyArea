@@ -113,7 +113,6 @@ fun MapScreen(
     var driving by rememberSaveable { mutableStateOf(false) }
     val walkingPath by mapViewModel.walkingPolylinePath.collectAsState()
     val drivingPath by mapViewModel.drivingPolylinePath.collectAsState()
-
     val appInfo = context.packageManager.getApplicationInfo(
         context.packageName,
         PackageManager.GET_META_DATA
@@ -240,9 +239,16 @@ fun MapScreen(
                                         mapViewModel.resetSearchResult()
                                         mapViewModel.resetSearchText()
                                         coroutineScope.launch {
-                                            cameraPositionState.animate(CameraUpdateFactory.newLatLng(place.location), CENTER_MAP_DURATION_IN_MS)
+                                            cameraPositionState.animate(
+                                                CameraUpdateFactory.newLatLng(
+                                                    place.location
+                                                ), CENTER_MAP_DURATION_IN_MS
+                                            )
                                         }
-                                        mapViewModel.switchMarker(location = place.location, level = place.level)
+                                        mapViewModel.switchMarker(
+                                            location = place.location,
+                                            level = place.level
+                                        )
                                         showMarkerInfo = true
                                     }
                             ) {
@@ -395,7 +401,9 @@ fun MapScreen(
             if (showMarkerInfo) {
                 Column {
                     Box(modifier = Modifier.weight(1.3f))
-                    Column(modifier = Modifier.weight(1f)) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Box(modifier = Modifier.weight(1f))
                         Column(
                             modifier = Modifier
@@ -468,19 +476,39 @@ fun MapScreen(
                                                         .addOnSuccessListener { location: Location? ->
                                                             if (location != null) {
                                                                 val latitude = when {
-                                                                    location.latitude > map.northEastBound.latitude ->  map.northEastBound.latitude
-                                                                    location.latitude < map.southWestBound.latitude -> { map.southWestBound.latitude }
+                                                                    location.latitude > map.northEastBound.latitude -> map.northEastBound.latitude
+                                                                    location.latitude < map.southWestBound.latitude -> {
+                                                                        map.southWestBound.latitude
+                                                                    }
+
                                                                     else -> location.latitude
                                                                 }
                                                                 val longitude = when {
-                                                                    location.longitude > map.northEastBound.longitude ->  map.northEastBound.longitude
-                                                                    location.longitude < map.southWestBound.longitude -> { map.southWestBound.longitude }
+                                                                    location.longitude > map.northEastBound.longitude -> map.northEastBound.longitude
+                                                                    location.longitude < map.southWestBound.longitude -> {
+                                                                        map.southWestBound.longitude
+                                                                    }
+
                                                                     else -> location.longitude
                                                                 }
-                                                                val destination = if (showMarkerInfo) displayedMarker.localisation else selectedLocation.value
-                                                                departureLocation.value = LatLng(latitude, longitude)
-                                                                Log.d("destination", destination.toString())
-                                                                mapViewModel.getRoutes(departureLocation.value!!, destination!!, bundle.getString("com.google.android.geo.API_KEY"))
+                                                                coroutineScope.launch {
+                                                                    cameraPositionState.animate(CameraUpdateFactory.newLatLng(
+                                                                        LatLng(latitude, longitude)
+                                                                    ), CENTER_MAP_DURATION_IN_MS)
+                                                                }
+                                                                val destination =
+                                                                    if (showMarkerInfo) displayedMarker.localisation else selectedLocation.value
+                                                                departureLocation.value =
+                                                                    LatLng(latitude, longitude)
+                                                                Log.d(
+                                                                    "destination",
+                                                                    destination.toString()
+                                                                )
+                                                                mapViewModel.getRoutes(
+                                                                    departureLocation.value!!,
+                                                                    destination!!,
+                                                                    bundle.getString("com.google.android.geo.API_KEY")
+                                                                )
                                                             } else {
                                                                 couldNotFindLocationToast.show()
                                                             }
@@ -499,65 +527,67 @@ fun MapScreen(
                                     }
                                 }
                             }
-                            MMAContentBox {
-                                Column(
-                                    modifier = Modifier
-                                        .verticalScroll(rememberScrollState())
-                                ) {
-                                    if (displayedMarker.markerDescription != "" && displayedMarker.markerDescription != null) {
-                                        Text(
-                                            text = displayedMarker.markerDescription as String,
-                                            modifier = Modifier.padding(bottom = 10.dp),
-                                            style = Typography.bodyMedium
-                                        )
-                                    }
-                                    if (displayedMarker.type == MarkerType.BUILDING) {
-                                        var selectedFloor by remember { mutableIntStateOf(mapViewModel.selectedLevel.value) }
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(start = 10.dp)
-                                        ) {
-                                            for (floor in displayedMarker.floors) {
-                                                Text(
-                                                    "${stringResource(id = R.string.floor)} ${floor.level}",
-                                                    style = Typography.bodyMedium,
-                                                    modifier = Modifier.clickable {
-                                                        selectedFloor = floor.level
-                                                    }
-                                                )
-                                                if (selectedFloor == floor.level) {
-                                                    Column(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(start = 10.dp)
-                                                    ) {
-                                                        if (floor.rooms.isNotEmpty()) {
-                                                            for (room in floor.rooms) {
-                                                                var showDescription by rememberSaveable { mutableStateOf(false) }
-                                                                Column {
-                                                                    Text(
-                                                                        text = room.name,
-                                                                        style = Typography.bodySmall,
-                                                                        modifier = Modifier
-                                                                            .clickable {
-                                                                                showDescription = !(showDescription)
-                                                                            }
-                                                                    )
-                                                                    if (showDescription) {
+                            if (routes == null) {
+                                MMAContentBox {
+                                    Column(
+                                        modifier = Modifier
+                                            .verticalScroll(rememberScrollState())
+                                    ) {
+                                        if (displayedMarker.markerDescription != "" && displayedMarker.markerDescription != null) {
+                                            Text(
+                                                text = displayedMarker.markerDescription as String,
+                                                modifier = Modifier.padding(bottom = 10.dp),
+                                                style = Typography.bodyMedium
+                                            )
+                                        }
+                                        if (displayedMarker.type == MarkerType.BUILDING) {
+                                            var selectedFloor by remember { mutableIntStateOf(mapViewModel.selectedLevel.value) }
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(start = 10.dp)
+                                            ) {
+                                                for (floor in displayedMarker.floors) {
+                                                    Text(
+                                                        "${stringResource(id = R.string.floor)} ${floor.level}",
+                                                        style = Typography.bodyMedium,
+                                                        modifier = Modifier.clickable {
+                                                            selectedFloor = floor.level
+                                                        }
+                                                    )
+                                                    if (selectedFloor == floor.level) {
+                                                        Column(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(start = 10.dp)
+                                                        ) {
+                                                            if (floor.rooms.isNotEmpty()) {
+                                                                for (room in floor.rooms) {
+                                                                    var showDescription by rememberSaveable { mutableStateOf(false) }
+                                                                    Column {
                                                                         Text(
-                                                                            text = if (room.description == "") stringResource(R.string.no_description) else room.description,
-                                                                            style = Typography.labelLarge,
-                                                                            modifier = Modifier.padding(start = 5.dp)
+                                                                            text = room.name,
+                                                                            style = Typography.bodySmall,
+                                                                            modifier = Modifier
+                                                                                .clickable {
+                                                                                    showDescription = !(showDescription)
+                                                                                }
                                                                         )
+                                                                        if (showDescription) {
+                                                                            Text(
+                                                                                text = if (room.description == "") stringResource(R.string.no_description) else room.description,
+                                                                                style = Typography.labelLarge,
+                                                                                modifier = Modifier.padding(start = 5.dp)
+                                                                            )
+                                                                        }
                                                                     }
                                                                 }
+                                                            } else {
+                                                                Text(
+                                                                    stringResource(id = R.string.empty_floor),
+                                                                    style = Typography.bodySmall,
+                                                                )
                                                             }
-                                                        } else {
-                                                            Text(
-                                                                stringResource(id = R.string.empty_floor),
-                                                                style = Typography.bodySmall,
-                                                            )
                                                         }
                                                     }
                                                 }

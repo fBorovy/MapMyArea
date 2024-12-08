@@ -29,6 +29,7 @@ import com.fborowy.mapmyarea.ui.theme.Typography
 
 @Composable
 fun MMAInstructionPopup(
+    title: String? = null,
     content: String,
     onDismiss: () -> Unit,
     onDismissLabel: String = stringResource(id = R.string.ok),
@@ -58,7 +59,7 @@ fun MMAInstructionPopup(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "?",
+                text = title ?: "?",
                 style = Typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )

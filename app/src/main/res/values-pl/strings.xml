@@ -107,4 +107,6 @@
     <string name="directions_walk">Trasa piesza</string>
     <string name="directions_car">Trasa samochodowa</string>
     <string name="no_description">Brak opisu</string>
+    <string name="show_description">Pokaż opis</string>
+    <string name="map_description_popup">Opis mapy</string>
 </resources>
