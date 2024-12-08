@@ -63,6 +63,7 @@ import com.fborowy.mapmyarea.domain.view_models.MapViewModel
 import com.fborowy.mapmyarea.presentation.MapStyle
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
 import com.fborowy.mapmyarea.presentation.components.MMAHeader
+import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
 import com.fborowy.mapmyarea.presentation.components.MMATextField
 import com.fborowy.mapmyarea.ui.theme.ButtonBlack
 import com.fborowy.mapmyarea.ui.theme.Typography
@@ -97,6 +98,7 @@ fun MapScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     var showMarkerInfo by rememberSaveable { mutableStateOf(false) }
+    var showMapDescription by rememberSaveable { mutableStateOf(false) }
     val displayedMarker by mapViewModel.currentMarkerInfo.collectAsState()
     val selectedLocation = rememberSaveable { mutableStateOf<LatLng?>(null) }
     val departureLocation = rememberSaveable { mutableStateOf<LatLng?>(null) }
@@ -149,6 +151,14 @@ fun MapScreen(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    if (showMapDescription) {
+        MMAInstructionPopup(
+            title = stringResource(R.string.map_description_popup),
+            content = map.mapDescription.ifEmpty { stringResource(R.string.no_description) },
+            onDismiss = { showMapDescription = false }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -184,6 +194,9 @@ fun MapScreen(
                         header = map.mapName?: stringResource(id = R.string.unknown_map),
                         onGoBack = {
                             navController.popBackStack()
+                        },
+                        onMoreInfo = {
+                            showMapDescription = true
                         }
                     )
                 }

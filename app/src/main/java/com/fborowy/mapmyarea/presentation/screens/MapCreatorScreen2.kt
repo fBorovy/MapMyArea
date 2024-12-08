@@ -121,7 +121,6 @@ fun MapCreatorScreen2(
                 Text(
                     stringResource(id = R.string.set_map_points_instruction),
                     style = Typography.labelMedium,
-                    color = onMapButtonBackground.copy(alpha = 0.75f),
                     modifier = Modifier.padding(start = 5.dp, bottom = 5.dp)
                 )
             }

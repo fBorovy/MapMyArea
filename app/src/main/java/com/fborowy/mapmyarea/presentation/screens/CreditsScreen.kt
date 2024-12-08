@@ -50,7 +50,7 @@ fun CreditsScreen(onGoBack: () -> Unit) {
                     .clickable { onGoBack() }
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.baseline_arrow_back_40),
+                    painter = painterResource(id = R.drawable.baseline_arrow_back_24),
                     contentDescription = stringResource(R.string.go_back)
                 )
             }

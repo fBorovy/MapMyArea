@@ -109,5 +109,7 @@
     <string name="directions_walk">Directions: walk</string>
     <string name="directions_car">Directions: car</string>
     <string name="no_description">No description</string>
+    <string name="show_description">Show description</string>
+    <string name="map_description_popup">Map description</string>
 
 </resources>
