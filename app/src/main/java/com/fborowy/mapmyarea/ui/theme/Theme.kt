@@ -49,7 +49,7 @@ private val LightColorScheme = lightColorScheme(
     primary = Color(0xFFEAD8D7),
     secondary = Color(0xFFE3CCCA),
     tertiary = Color(0xFFB97D79),
-    background = Color(0xFFF8F2F2),
+    background = Color(0xFFF8F2F2),//onMapButtonBackground.copy(alpha = 0.85f),//Color(0xFFF8F2F2),
 
     onPrimary = Color(0xFF323232),
     onSecondary = Color(0xFF765856),
@@ -64,15 +64,15 @@ fun MapMyAreaTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
+    val colorScheme = LightColorScheme//when {
 //        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
 //            val context = LocalContext.current
 //            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 //        }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+//        darkTheme -> DarkColorScheme
+//        else -> LightColorScheme
+//    }
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

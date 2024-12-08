@@ -75,7 +75,7 @@
     <string name="unknown_map">Unknown map</string>
     <string name="own_maps">Own maps</string>
     <string name="toast_sign_up">Signed up successfully</string>
-    <string name="map_name_dot_error_message">Map nampe can\'t start nor end with dot</string>
+    <string name="map_name_dot_error_message">Map name can\'t start nor end with dot</string>
     <string name="map_name_shorter_than_3_error_message">Map name can\'t be shorter than 3 characters</string>
     <string name="map_name_invalid_characters_error_message">Map name contains invalid characters</string>
     <string name="double_dot_map_name_error_message">Map name can\'t contain double dots (..)</string>
@@ -108,5 +108,6 @@
     <string name="location_could_not_be_found">Coultn\'t find location of your device</string>
     <string name="directions_walk">Directions: walk</string>
     <string name="directions_car">Directions: car</string>
+    <string name="no_description">No description</string>
 
 </resources>

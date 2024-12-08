@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -170,12 +171,12 @@ fun MapScreen(
                     modifier = Modifier
                         .shadow(
                             elevation = 9.dp,
-                            shape = RoundedCornerShape(bottomEnd = 25.dp, bottomStart = 25.dp),
+                            shape = RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp),
                             clip = true
                         )
                         .zIndex(1f)
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(bottomEnd = 20.dp, bottomStart = 20.dp))
+                        .clip(RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp))
                         .background(MaterialTheme.colorScheme.background)
                         .padding(10.dp)
                 ) {
@@ -190,7 +191,7 @@ fun MapScreen(
                     modifier = Modifier
                         .zIndex(1f)
                         .fillMaxWidth()
-                        .padding(start = 10.dp, top = 10.dp, end = 60.dp)
+                        .padding(start = 60.dp, top = 10.dp, end = 60.dp)
                         .clip(RoundedCornerShape(11.dp))
                         .background(onMapButtonBackground.copy(alpha = 0.75f))
                 ) {
@@ -208,7 +209,7 @@ fun MapScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 13.dp, end = 63.dp)
+                            .padding(start = 62.dp, end = 63.dp)
                             .clip(RoundedCornerShape(11.dp))
                             .background(onMapButtonBackground.copy(alpha = 0.65f))
                             .padding(horizontal = 10.dp)
@@ -305,20 +306,23 @@ fun MapScreen(
                         )
                     }
                 }
-                val markerParkingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 100, 100, true))
-                val markerBuildingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 100, 100, true))
-                val markerOtherBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 100, 100, true))
-                val biggerMarkerParkingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 120, 120, true))
-                val biggerMarkerBuildingBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 120, 120, true))
-                val biggerMarkerOtherBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 120, 120, true))
-                val markerUnknownBitmap = BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(
-                    BitmapFactory.decodeResource(context.resources, R.drawable.unknown_location), 100, 100, true))
+                val markerParkingBitmap = BitmapDescriptorFactory.fromBitmap(mapViewModel.tintBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 80, 80, true), color = Color(0xFF777777).toArgb()))
+                val markerBuildingBitmap = BitmapDescriptorFactory.fromBitmap(mapViewModel.tintBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 80, 80, true), color = Color(0xFF777777).toArgb()))
+                val markerOtherBitmap = BitmapDescriptorFactory.fromBitmap(mapViewModel.tintBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 80, 80, true), color = Color(0xFF777777).toArgb()))
+                val tintedParkingBitmap = mapViewModel.tintBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_parking), 120, 120, true), color = Color.White.toArgb())
+                val tintedBuildingBitmap = mapViewModel.tintBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_building), 120, 120, true), color = Color.White.toArgb())
+                val tintedOtherBitmap = mapViewModel.tintBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.marker_other), 120, 120, true), color = Color.White.toArgb())
+                val biggerMarkerParkingBitmap = BitmapDescriptorFactory.fromBitmap(tintedParkingBitmap)
+                val biggerMarkerBuildingBitmap = BitmapDescriptorFactory.fromBitmap(tintedBuildingBitmap)
+                val biggerMarkerOtherBitmap = BitmapDescriptorFactory.fromBitmap(tintedOtherBitmap)
+                val markerUnknownBitmap = BitmapDescriptorFactory.fromBitmap(mapViewModel.tintBitmap(Bitmap.createScaledBitmap(
+                    BitmapFactory.decodeResource(context.resources, R.drawable.unknown_location), 120, 120, true), color = Color.White.toArgb()))
                 if (map.markers != null) {
                     for (marker in map.markers) {
                         Marker(
@@ -529,7 +533,7 @@ fun MapScreen(
                                                                     )
                                                                     if (showDescription) {
                                                                         Text(
-                                                                            text = room.description,
+                                                                            text = if (room.description == "") stringResource(R.string.no_description) else room.description,
                                                                             style = Typography.labelLarge,
                                                                             modifier = Modifier.padding(start = 5.dp)
                                                                         )

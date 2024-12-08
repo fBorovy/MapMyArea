@@ -70,9 +70,10 @@ fun MapCreatorScreen1(
     var isInstructionVisible by rememberSaveable { mutableStateOf(true) }
 
     val mapUiSettings = MapUiSettings(
-        rotationGesturesEnabled = true,
+        rotationGesturesEnabled = false,
         myLocationButtonEnabled = true, //isMyLocationEnabled has to be true too to display it
-        compassEnabled = true,
+        compassEnabled = false,
+
         //mapToolbarEnabled = false,
     )
 
@@ -117,6 +118,7 @@ fun MapCreatorScreen1(
                 properties = MapProperties(
                     isMyLocationEnabled = true,
                     mapStyleOptions = MapStyleOptions(MapStyle.mapStyleJson),
+
                 ), //app must have a localisation permission first in order to enable it
                 //onMyLocationButtonClick = { false },
                 uiSettings = mapUiSettings,

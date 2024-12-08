@@ -43,6 +43,7 @@ import com.fborowy.mapmyarea.presentation.components.MMAButton
 import com.fborowy.mapmyarea.presentation.components.MMAContentBox
 import com.fborowy.mapmyarea.presentation.components.MMAInstructionPopup
 import com.fborowy.mapmyarea.presentation.components.MMATextField
+import com.fborowy.mapmyarea.ui.theme.MapMyAreaTheme
 import com.fborowy.mapmyarea.ui.theme.Typography
 
 @Composable
@@ -125,19 +126,21 @@ fun HomeScreen(
                 }
             )
         }
-        if (ownedMaps.isNotEmpty()) {
+        if (ownedMaps.isNotEmpty() || savedMaps.isNotEmpty()) {
             Spacer(modifier = Modifier.height(25.dp))
             MMAContentBox {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = context.getString(R.string.own_maps),
+                        text = context.getString(R.string.user_maps),
                         style = Typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     for (map in ownedMaps) {
+                        Spacer(
+                            modifier = Modifier.fillMaxWidth().height(1.dp)
+                        )
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -156,7 +159,8 @@ fun HomeScreen(
                                     modifier = Modifier.clickable {
                                         appViewModel.clearSearchText()
                                         onOpenMap(map)
-                                    }
+                                    },
+                                    color = MaterialTheme.colorScheme.onSecondary
                                 )
                             }
                             Row {
@@ -170,22 +174,65 @@ fun HomeScreen(
                                         .clickable {
                                             appViewModel.clearSearchText()
                                             onEditMap(map)
-                                        }
+                                        },
+                                    tint = MaterialTheme.colorScheme.onSecondary
+
                                 )
                                 Icon(
                                     painter = painterResource(id = R.drawable.delete_24),
                                     contentDescription = stringResource(id = R.string.delete_description),
                                     modifier = Modifier
                                         .size(28.dp)
-                                        .padding(top = 4.dp)
+                                        .padding(top = 2.dp)
                                         .clickable {
                                             keyboardController?.hide()
                                             focusManager.clearFocus()
                                             mapToDeleteName = map.mapName!!
                                             showOwnMapDeletionConfirmationDialog = true
-                                        }
+                                        },
+                                    tint = MaterialTheme.colorScheme.onSecondary
                                 )
                             }
+                        }
+                    }
+                    for (map in savedMaps) {
+                        Spacer(
+                            modifier = Modifier.fillMaxWidth().height(1.dp)
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier.weight(1f).padding(end = 5.dp)
+                            ) {
+                                Text(
+                                    text = "${map.mapName}",
+                                    style = Typography.bodyMedium,
+                                    modifier = Modifier.clickable {
+                                        appViewModel.clearSearchText()
+                                        onOpenMap(map)
+                                    },
+                                    color = MaterialTheme.colorScheme.onSecondary
+
+                                )
+                            }
+                            Icon(
+                                painter = painterResource(id = R.drawable.delete_24),
+                                contentDescription = stringResource(id = R.string.delete_description),
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .padding(top = 2.dp)
+                                    .clickable {
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                        mapToDeleteName = map.mapName!!
+                                        showSavedMapRemovalConfirmationDialog = true
+                                    },
+                                tint = MaterialTheme.colorScheme.onSecondary
+                            )
                         }
                     }
                 }
@@ -223,52 +270,6 @@ fun HomeScreen(
             }
         }
         Spacer(modifier = Modifier.height(25.dp))
-        MMAContentBox {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = context.getString(R.string.user_maps),
-                    style = Typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                for (map in savedMaps) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 3.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier.weight(1f).padding(end = 5.dp)
-                        ) {
-                            Text(
-                                text = "${map.mapName}",
-                                style = Typography.bodyMedium,
-                                modifier = Modifier.clickable {
-                                    appViewModel.clearSearchText()
-                                    onOpenMap(map)
-                                }
-                            )
-                        }
-                        Icon(
-                            painter = painterResource(id = R.drawable.delete_24),
-                            contentDescription = stringResource(id = R.string.delete_description),
-                            modifier = Modifier
-                                .size(28.dp)
-                                .padding(top = 4.dp)
-                                .clickable {
-                                    keyboardController?.hide()
-                                    focusManager.clearFocus()
-                                    mapToDeleteName = map.mapName!!
-                                    showSavedMapRemovalConfirmationDialog = true
-                                }
-                        )
-                    }
-                }
-            }
-        }
     }
     if (addingMapState.addingSuccessful) {
         appViewModel.clearSearchText()

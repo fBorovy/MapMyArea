@@ -1,5 +1,10 @@
 package com.fborowy.mapmyarea.domain.view_models
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -79,6 +84,16 @@ class MapViewModel(
 
         if (searchText.value.length > 2)
             searchPlaces()
+    }
+
+    fun tintBitmap(original: Bitmap, color: Int): Bitmap {
+        val tintedBitmap = Bitmap.createBitmap(original.width, original.height, original.config)
+        val canvas = Canvas(tintedBitmap)
+        val paint = Paint().apply {
+            colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
+        }
+        canvas.drawBitmap(original, 0f, 0f, paint)
+        return tintedBitmap
     }
 
     private fun searchPlaces() {

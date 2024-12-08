@@ -103,4 +103,8 @@
     <string name="marker_name_in_use">Znacznik o podanej nazwie już istnieje w Twojej mapie. Wprowadź inną nazwę.</string>
     <string name="search_place">Szukaj</string>
     <string name="empty_floor">Brak pomieszczeń na tym piętrze</string>
+    <string name="location_could_not_be_found">Nie udało się znaleźć lokalizacji urządzenia</string>
+    <string name="directions_walk">Trasa piesza</string>
+    <string name="directions_car">Trasa samochodowa</string>
+    <string name="no_description">Brak opisu</string>
 </resources>
